@@ -11,7 +11,9 @@ const env = loadEnv("", process.cwd(), "");
 // https://astro.build/config
 export default defineConfig({
 	site: "http://astrochattygpt.unfolding.io",
-	adapter: netlify(),
+	adapter: netlify({
+		imageCDN: false,
+	  }),
 	integrations: [
 		packageName({
 			upstashUrl: env.UPSTASH_SEARCH_REST_URL,
