@@ -1,6 +1,6 @@
 {
-	"name": "astro-chatty-gpt",
-	"version": "0.0.0",
+	"name": "@unfolding/astro-chatty-gpt",
+	"version": "0.0.1",
 	"description": "A chatbot for your astro site powered by Upstash search and gpt-5",
 	"type": "module",
 	"sideEffects": false,
