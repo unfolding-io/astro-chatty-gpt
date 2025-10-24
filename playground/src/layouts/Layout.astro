@@ -1,0 +1,450 @@
+---
+
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import "../styles/global.css"; 
+
+interface Props {
+	title: string;
+	thumbnail: string;
+	description: string;
+}
+
+const { title, description, thumbnail } = Astro.props;
+
+const links = [
+	{
+		name: "Home",
+		href: "/"
+	},
+	{
+		name: "Getting Started",
+		href: "/getting-started"
+	},
+	
+	{
+		name: "Chat Widget",
+		href: "/using-our-chat-widget"
+	}
+]
+
+
+const posts = await getCollection('pages');
+const sortedPosts = posts.sort((a, b) => (b.data.order || 0) - (a.data.order || 0)); 
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="AstroChattyGpt - AI-powered search and chat for Astro websites" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		{
+			thumbnail && (
+				<meta property="og:image" content={thumbnail}/>
+			)
+		} 
+		<title>{title} | AstroChattyGpt</title>
+		<meta name="og:description" content={description} />
+		<meta name="description" content={description} />
+	</head>
+	<body>
+		<!-- AI-themed header -->
+		<header class="ai-header">
+			<div class="header-container">
+				<div class="logo">
+					<div class="logo-icon">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="50" height="50">
+							<path fill="url(#aiGradient)" d="M12 2c.906 0 1.783.122 2.617.348a6 6 0 0 0 7.294 8.339q.087.645.089 1.313c0 5.523-4.477 10-10 10a9.96 9.96 0 0 1-4.709-1.176L2 22l1.176-5.291A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2m7.53-.68a.507.507 0 0 1 .94 0l.254.61a4.37 4.37 0 0 0 2.25 2.327l.717.32a.53.53 0 0 1 0 .962l-.758.338a4.36 4.36 0 0 0-2.22 2.25l-.246.566a.506.506 0 0 1-.934 0l-.247-.565a4.36 4.36 0 0 0-2.219-2.251l-.76-.338a.53.53 0 0 1 0-.963l.718-.32a4.37 4.37 0 0 0 2.251-2.325z"/>
+							<defs>
+								<linearGradient id="aiGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+									<stop offset="0%" style="stop-color:#00D4FF" />
+									<stop offset="100%" style="stop-color:#0099CC" />
+								</linearGradient>
+							</defs>
+						</svg>
+					</div>
+					<span class="logo-text">AstroChattyGpt</span>
+				</div>
+				<nav class="header-nav">
+					{links.slice(0, 4).map(link => (
+						<a href={link.href} class="nav-link">{link.name}</a>
+					))}
+				</nav>
+				<div class="header-actions">
+					<a href="https://github.com/unfolding-io/astro-chatty-gpt" class="btn-secondary">Github</a>
+					<a href="/getting-started" class="btn-primary">Get Started</a>
+				</div>
+			</div>
+		</header>
+
+		<main class="main-content">
+			<slot />
+		</main>
+
+		<!-- AI-themed footer -->
+		<footer class="ai-footer">
+			<div class="footer-container">
+				<div class="footer-grid">
+					<div class="footer-brand">
+						<div class="footer-logo">
+							<div class="logo-icon">
+								<svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+									<path d="M16 2L20 8H28L24 14L28 20H20L16 26L12 20H4L8 14L4 8H12L16 2Z" fill="url(#gradient2)" />
+									<defs>
+										<linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+											<stop offset="0%" style="stop-color:#00D4FF" />
+											<stop offset="100%" style="stop-color:#0099CC" />
+										</linearGradient>
+									</defs>
+								</svg>
+							</div>
+							<span>AstroChattyGpt</span>
+						</div>
+						<p>AI-powered search and chat for Astro websites</p>
+					</div>
+					<div class="footer-links">
+						<h4>Documentation</h4>
+						<ul>
+							{sortedPosts.map((post: CollectionEntry<'pages'>) => (
+								<li><a href={post.slug}>{post.data.title}</a></li>
+							))}
+						</ul>
+					</div>
+					<div class="footer-tech">
+						<h4>Powered By</h4>
+						<div class="tech-badges">
+							<span class="tech-badge">GPT-5</span>
+							<span class="tech-badge">Upstash</span>
+							<span class="tech-badge">Astro</span>
+						</div>
+					</div>
+				</div>
+				<div class="footer-bottom">
+					<p>&copy; 2024 AstroChattyGpt. Made with ❤️ by <a href="https://unfolding.io">unfolding</a></p>
+				</div>
+			</div>
+		</footer>
+
+		<!-- Chat Widget -->
+		<div id="chat-widget"></div>
+		<script src="/widget.iife.js" is:inline defer></script>
+		<script>
+			document.addEventListener("DOMContentLoaded", function () {
+				setTimeout(() => {
+					if (window.AstroChattyGptWidget) {
+						window.AstroChattyGptWidget.init(
+							{ 
+								title: "AstroChattyGpt",
+								language: "en", 
+								theme: {
+									primary: "#00D4FF",
+									primaryHover: "#0099CC",
+								},
+							},
+							"chat-widget"
+						);
+					}
+				}, 1000);
+			});
+		</script>
+	</body>
+</html>
+
+<style is:global>
+	:root {
+		--ai-primary: #00D4FF;
+		--ai-primary-hover: #0099CC;
+		--ai-secondary: #1A1D29;
+		--ai-accent: #2D3142;
+		--ai-text: #FFFFFF;
+		--ai-text-muted: rgba(255, 255, 255, 0.7);
+		--ai-border: rgba(0, 212, 255, 0.2);
+		--ai-gradient: linear-gradient(135deg, #00D4FF 0%, #0099CC 100%);
+		--ai-bg: #0F1115;
+		--ai-card-bg: rgba(26, 29, 41, 0.8);
+	}
+
+	* {
+		box-sizing: border-box;
+	}
+
+	html {
+		font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+		background: var(--ai-bg);
+		color: var(--ai-text);
+		line-height: 1.6;
+	}
+
+	body {
+		margin: 0;
+		padding: 0;
+		background: var(--ai-bg);
+		min-height: 100vh;
+	}
+
+	/* AI Header */
+	.ai-header {
+		background: rgba(15, 17, 21, 0.95);
+		backdrop-filter: blur(20px);
+		border-bottom: 1px solid var(--ai-border);
+		position: sticky;
+		top: 0;
+		z-index: 100;
+	}
+
+	.header-container {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 0 2rem;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		height: 70px;
+	}
+
+	.logo {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		font-weight: 700;
+		font-size: 1.25rem;
+		color: var(--ai-text);
+	}
+
+	.logo-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.logo-text {
+		background: var(--ai-gradient);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
+
+	.header-nav {
+		display: flex;
+		gap: 2rem;
+		align-items: center;
+	}
+
+	.nav-link {
+		color: var(--ai-text-muted);
+		text-decoration: none;
+		font-weight: 500;
+		transition: color 0.2s ease;
+		position: relative;
+	}
+
+	.nav-link:hover {
+		color: var(--ai-primary);
+	}
+
+	.nav-link::after {
+		content: '';
+		position: absolute;
+		bottom: -5px;
+		left: 0;
+		width: 0;
+		height: 2px;
+		background: var(--ai-gradient);
+		transition: width 0.2s ease;
+	}
+
+	.nav-link:hover::after {
+		width: 100%;
+	}
+
+	.header-actions {
+		display: flex;
+		gap: 1rem;
+		align-items: center;
+	}
+
+	.btn-primary, .btn-secondary {
+		padding: 0.75rem 1.5rem;
+		border-radius: 8px;
+		text-decoration: none;
+		font-weight: 600;
+		transition: all 0.2s ease;
+		border: 1px solid transparent;
+	}
+
+	.btn-primary {
+		background: var(--ai-gradient);
+		color: white;
+		border: none;
+	}
+
+	.btn-primary:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 10px 25px rgba(0, 212, 255, 0.3);
+	}
+
+	.btn-secondary {
+		background: transparent;
+		color: var(--ai-text);
+		border: 1px solid var(--ai-border);
+	}
+
+	.btn-secondary:hover {
+		background: rgba(0, 212, 255, 0.1);
+		border-color: var(--ai-primary);
+	}
+
+	/* Main Content */
+	.main-content {
+		min-height: calc(100vh - 140px);
+	}
+
+	/* AI Footer */
+	.ai-footer {
+		background: linear-gradient(135deg, rgba(26, 29, 41, 0.95) 0%, rgba(15, 17, 21, 0.95) 100%);
+		border-top: 1px solid var(--ai-border);
+		margin-top: 4rem;
+		padding: 3rem 0 1rem;
+	}
+
+	.footer-container {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 0 2rem;
+	}
+
+	.footer-grid {
+		display: grid;
+		grid-template-columns: 2fr 1fr 1fr;
+		gap: 3rem;
+		margin-bottom: 2rem;
+	}
+
+	.footer-brand {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.footer-logo {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-weight: 700;
+		font-size: 1.25rem;
+		color: var(--ai-text);
+	}
+
+	.footer-brand p {
+		color: var(--ai-text-muted);
+		margin: 0;
+		line-height: 1.6;
+	}
+
+	.footer-links h4,
+	.footer-tech h4 {
+		color: var(--ai-text);
+		font-size: 1.1rem;
+		font-weight: 600;
+		margin: 0 0 1rem 0;
+	}
+
+	.footer-links ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.footer-links li {
+		margin: 0.5rem 0;
+	}
+
+	.footer-links a {
+		color: var(--ai-text-muted);
+		text-decoration: none;
+		transition: color 0.2s ease;
+	}
+
+	.footer-links a:hover {
+		color: var(--ai-primary);
+	}
+
+	.tech-badges {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.tech-badge {
+		background: rgba(0, 212, 255, 0.1);
+		color: var(--ai-primary);
+		padding: 0.25rem 0.75rem;
+		border-radius: 20px;
+		font-size: 0.875rem;
+		font-weight: 500;
+		border: 1px solid rgba(0, 212, 255, 0.2);
+	}
+
+	.footer-bottom {
+		border-top: 1px solid var(--ai-border);
+		padding-top: 1.5rem;
+		text-align: center;
+	}
+
+	.footer-bottom p {
+		color: var(--ai-text-muted);
+		margin: 0;
+		font-size: 0.9rem;
+	}
+
+	.footer-bottom a {
+		color: var(--ai-primary);
+		text-decoration: none;
+	}
+
+	.footer-bottom a:hover {
+		text-decoration: underline;
+	}
+
+	/* Responsive Design */
+	@media (max-width: 850px) {
+		.header-container {
+			padding: 0 1rem;
+			flex-wrap: wrap;
+			height: auto;
+			padding: 1rem;
+		}
+
+		.header-nav {
+			display: none;
+		}
+
+		.header-actions {
+			display:none;
+		}
+
+		.footer-grid {
+			grid-template-columns: 1fr;
+			gap: 2rem;
+		}
+
+		.footer-container {
+			padding: 0 1rem;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.header-actions {
+			flex-direction: column;
+			gap: 0.5rem;
+		}
+
+		.btn-primary, .btn-secondary {
+			width: 100%;
+			text-align: center;
+		}
+	}
+</style>

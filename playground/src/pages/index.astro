@@ -1,0 +1,1170 @@
+--- 
+import Layout from "../layouts/Layout.astro";
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+
+const posts = await getCollection('pages');
+const sortedPosts = posts.sort((a, b) => (b.data.order || 0) - (a.data.order || 0)); 
+---
+
+<Layout title="Welcome to Astro." thumbnail="/home.png" description="Welcome to Astro. This is a playground for the Astro Chatty GPT package.">
+	<main>
+		<div class="hero-section">
+			<div class="hero-icon">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="120" height="120">
+					<path fill="url(#aiGradient)" d="M12 2c.906 0 1.783.122 2.617.348a6 6 0 0 0 7.294 8.339q.087.645.089 1.313c0 5.523-4.477 10-10 10a9.96 9.96 0 0 1-4.709-1.176L2 22l1.176-5.291A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2m7.53-.68a.507.507 0 0 1 .94 0l.254.61a4.37 4.37 0 0 0 2.25 2.327l.717.32a.53.53 0 0 1 0 .962l-.758.338a4.36 4.36 0 0 0-2.22 2.25l-.246.566a.506.506 0 0 1-.934 0l-.247-.565a4.36 4.36 0 0 0-2.219-2.251l-.76-.338a.53.53 0 0 1 0-.963l.718-.32a4.37 4.37 0 0 0 2.251-2.325z"/>
+					<defs>
+						<linearGradient id="aiGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+							<stop offset="0%" style="stop-color:#00D4FF" />
+							<stop offset="100%" style="stop-color:#0099CC" />
+						</linearGradient>
+					</defs>
+				</svg>
+			</div>
+			<h1 class="hero-title">
+				An <span class="ai-text">AI-powered</span> chatbot for Astro
+			</h1>
+			<p class="hero-subtitle">
+				AstroChattyGpt is an AI integration, where intelligent search meets conversational AI for your Astro website.
+			</p>
+			<div class="hero-actions">
+				<a href="/getting-started" class="btn-primary-large">Get Started</a>
+				<a href="https://github.com/unfolding-io/astro-chatty-gpt" class="btn-secondary-large">Github</a>
+			</div>
+		</div>
+		<div class="demo-section">
+			<div class="demo-container">
+				<div class="demo-header">
+					<div class="demo-icon">🤖</div>
+					<h2>Try the AI Chatbot</h2>
+					<p>Experience the power of GPT-5 with intelligent search across your website content</p>
+				</div>
+				
+				<div class="demo-form">
+					<form id="chatbot-form">
+						<div class="form-group">
+							<label for="query">Ask a question about this website:</label>
+							<textarea 
+								id="query" 
+								name="query" 
+								placeholder="What is AstroChattyGpt? How does it work? What are the main features?"
+								rows="3"
+								required
+							></textarea>
+						</div>
+						
+						<div class="form-options">
+							<div class="form-group">
+								<label class="checkbox-label">
+									<input type="checkbox" id="stream" name="stream" />
+									<span class="checkmark"></span>
+									Enable Streaming Response
+								</label>
+							</div>
+							
+					
+						</div>
+						
+						<button type="submit" id="submit-btn" class="btn-demo">
+							<span class="btn-text">Send Question</span>
+							<span class="btn-icon">→</span>
+						</button>
+					</form>
+					
+					<div id="response" class="response-area" style="display: none;">
+						<div class="response-header">
+							<h3>AI Response</h3>
+							<div class="response-status">
+								<div class="status-indicator"></div>
+								<span>Powered by GPT-5</span>
+							</div>
+						</div>
+						<code id="response-content" class="response-content"></code>
+						<div id="sources" class="sources-area" style="display: none;">
+							<h4>Sources</h4>
+							<div id="sources-content" class="sources-grid"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="features-section">
+			<div class="features-container">
+				<div class="section-header">
+					<h2>Features</h2>
+					<p>Experience website search with AI-powered intelligence</p>
+				</div>
+				
+				<div class="features-grid">
+					<div class="feature-card">
+						<div class="feature-icon">🤖</div>
+						<h3>GPT-5 Powered</h3>
+						<p>Advanced AI responses using OpenAI's latest GPT-5 model for intelligent, context-aware conversations</p>
+					</div>
+					<div class="feature-card">
+						<div class="feature-icon">🔍</div>
+						<h3>Semantic Search</h3>
+						<p>Intelligent content discovery with Upstash Search that understands context and meaning</p>
+					</div>
+					<div class="feature-card">
+						<div class="feature-icon">⚡</div>
+						<h3>Auto-Indexing</h3>
+						<p>Automatically crawls and indexes your content on every build for always up-to-date search</p>
+					</div>
+					
+				</div>
+			</div>
+		</div>
+
+		<div class="tech-stack-section">
+			<div class="tech-container">
+				<div class="section-header">
+					<h2>🛠️ Built with Modern Tech</h2>
+					<p>Leveraging cutting-edge technologies for optimal performance</p>
+				</div>
+				
+				<div class="stack-grid">
+					
+					<div class="tech-card">
+						<div class="tech-icon">
+							<svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+								<path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+								<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+							</svg>
+						</div>
+						<h3>OpenAI GPT-5</h3>
+						<p>Latest AI model for intelligent responses and natural language understanding</p>
+					</div>
+					<div class="tech-card">
+						<div class="tech-icon">
+							<svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+								<circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+								<path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+						</div>
+						<h3>Upstash Search</h3>
+						<p>Serverless search infrastructure for lightning-fast content indexing</p>
+					</div>
+					<div class="tech-card">
+						<div class="tech-icon">
+							<svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+								<path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+						</div>
+						<h3>Vercel AI SDK</h3>
+						<p>Streaming AI responses and chat functionality for seamless user experience</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="documentation-section">
+			<div class="docs-container">
+				<div class="section-header">
+					<h2>📚 Documentation</h2>
+					<p>Everything you need to get started with AstroChattyGpt</p>
+				</div>
+				
+				<div class="docs-grid">
+					{sortedPosts.map((post: CollectionEntry<'pages'>) => (
+						<a href={`/${post.slug}`} class="doc-card">
+							<div class="doc-icon">
+								{post.data.icon || '📖'}
+							</div>
+							<div class="doc-content">
+								<h3>{post.data.title}</h3>
+								<p>{post.data.description || `Learn about ${post.data.title.toLowerCase()}`}</p>
+								<div class="doc-arrow">→</div>
+							</div>
+						</a>
+					))}
+				</div>
+			</div>
+		</div>
+	</main>
+</Layout>
+
+<style>
+	main {
+		margin: 0;
+		padding: 0;
+		color: white;
+		font-size: 20px;
+		line-height: 1.6;
+	}
+
+	/* Hero Section */
+	.hero-section {
+		text-align: center;
+		padding: 4rem 2rem;
+		background: linear-gradient(135deg, rgba(15, 17, 21, 0.95) 0%, rgba(26, 29, 41, 0.95) 100%);
+		border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+		position: relative;
+		overflow: hidden;
+	}
+
+	.hero-section::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: radial-gradient(circle at 50% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+		pointer-events: none;
+	}
+
+	.hero-icon {
+		margin-bottom: 2rem;
+		display: flex;
+		justify-content: center;
+		animation: float 3s ease-in-out infinite;
+	}
+
+	@keyframes float {
+		0%, 100% { transform: translateY(0px); }
+		50% { transform: translateY(-10px); }
+	}
+
+	.hero-title {
+		font-size: 3.5rem;
+		font-weight: 800;
+		line-height: 1.1;
+		margin: 0 0 1.5rem 0;
+		color: white;
+		position: relative;
+		max-width: 800px; 
+		text-wrap: balance;
+		margin-inline: auto;
+		z-index: 1;
+	}
+
+	.ai-text {
+		background: linear-gradient(135deg, #00D4FF 0%, #0099CC 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+		position: relative;
+	}
+
+	.ai-text::after {
+		content: '';
+		position: absolute;
+		bottom: -2px;
+		left: 0;
+		right: 0;
+		height: 3px;
+		background: linear-gradient(90deg, transparent, #00D4FF, transparent);
+		border-radius: 2px;
+	}
+
+	.hero-subtitle {
+		font-size: 1.25rem;
+		color: rgba(255, 255, 255, 0.8);
+		margin: 0 0 3rem 0;
+		max-width: 600px;
+		margin-left: auto;
+		margin-right: auto;
+		line-height: 1.6;
+		position: relative;
+		z-index: 1;
+	}
+
+	.hero-actions {
+		display: flex;
+		gap: 1.5rem;
+		justify-content: center;
+		flex-wrap: wrap;
+		position: relative;
+		z-index: 1;
+	}
+
+	.btn-primary-large, .btn-secondary-large {
+		padding: 1rem 2rem;
+		border-radius: 12px;
+		text-decoration: none;
+		font-weight: 600;
+		font-size: 1.1rem;
+		transition: all 0.3s ease;
+		border: 2px solid transparent;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.btn-primary-large {
+		background: linear-gradient(135deg, #00D4FF 0%, #0099CC 100%);
+		color: white;
+		box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+	}
+
+	.btn-primary-large:hover {
+		transform: translateY(-3px);
+		box-shadow: 0 15px 40px rgba(0, 212, 255, 0.4);
+	}
+
+	.btn-secondary-large {
+		background: transparent;
+		color: white;
+		border: 2px solid rgba(0, 212, 255, 0.5);
+	}
+
+	.btn-secondary-large:hover {
+		background: rgba(0, 212, 255, 0.1);
+		border-color: #00D4FF;
+		transform: translateY(-2px);
+	}
+	/* Features Section */
+	.features-section {
+		padding: 4rem 2rem;
+		background: rgba(15, 17, 21, 0.3);
+		border-top: 1px solid rgba(0, 212, 255, 0.2);
+	}
+
+	.features-container {
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.section-header {
+		text-align: center;
+		margin-bottom: 3rem;
+	}
+
+	.section-header h2 {
+		font-size: 2.5rem;
+		font-weight: 700;
+		margin: 0 0 1rem 0;
+		background: linear-gradient(135deg, #00D4FF 0%, #0099CC 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
+
+	.section-header p {
+		font-size: 1.2rem;
+		color: rgba(255, 255, 255, 0.8);
+		margin: 0;
+		max-width: 600px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.features-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 2rem;
+	}
+
+	.feature-card {
+		background: rgba(26, 29, 41, 0.6);
+		backdrop-filter: blur(20px);
+		border: 1px solid rgba(0, 212, 255, 0.2);
+		border-radius: 16px;
+		padding: 2rem;
+		text-align: center;
+		transition: all 0.3s ease;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.feature-card::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 1px;
+		background: linear-gradient(90deg, transparent, #00D4FF, transparent);
+		opacity: 0;
+		transition: opacity 0.3s ease;
+	}
+
+	.feature-card:hover {
+		transform: translateY(-5px);
+		border-color: rgba(0, 212, 255, 0.4);
+		box-shadow: 0 20px 40px rgba(0, 212, 255, 0.1);
+	}
+
+	.feature-card:hover::before {
+		opacity: 1;
+	}
+
+	.feature-icon {
+		font-size: 3rem;
+		margin-bottom: 1.5rem;
+		display: block; 
+	}
+
+	.feature-card h3 {
+		color: #00D4FF;
+		font-size: 1.4rem;
+		font-weight: 600;
+		margin: 0 0 1rem 0;
+	}
+
+	.feature-card p {
+		color: rgba(255, 255, 255, 0.8);
+		line-height: 1.6;
+		margin: 0;
+		font-size: 1rem;
+	}
+
+	/* Tech Stack Section */
+	.tech-stack-section {
+		padding: 4rem 2rem;
+		background: rgba(15, 17, 21, 0.5);
+		border-top: 1px solid rgba(0, 212, 255, 0.2);
+	}
+
+	.tech-container {
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.stack-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 2rem;
+	}
+
+	.tech-card {
+		background: rgba(26, 29, 41, 0.8);
+		backdrop-filter: blur(20px);
+		border: 1px solid rgba(0, 212, 255, 0.3);
+		border-radius: 16px;
+		padding: 2rem;
+		text-align: center;
+		transition: all 0.3s ease;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.tech-card::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 1px;
+		background: linear-gradient(90deg, transparent, #00D4FF, transparent);
+		opacity: 0;
+		transition: opacity 0.3s ease;
+	}
+
+	.tech-card:hover {
+		transform: translateY(-5px);
+		border-color: rgba(0, 212, 255, 0.5);
+		box-shadow: 0 20px 40px rgba(0, 212, 255, 0.15);
+	}
+
+	.tech-card:hover::before {
+		opacity: 1;
+	}
+
+	.tech-icon {
+		width: 60px;
+		height: 60px;
+		margin: 0 auto 1.5rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: rgba(0, 212, 255, 0.1);
+		border-radius: 12px;
+		color: #00D4FF;
+		transition: all 0.3s ease;
+	}
+
+	.tech-card:hover .tech-icon {
+		background: rgba(0, 212, 255, 0.2);
+		transform: scale(1.1);
+	}
+
+	.tech-card h3 {
+		color: #00D4FF;
+		font-size: 1.4rem;
+		font-weight: 600;
+		margin: 0 0 1rem 0;
+	}
+
+	.tech-card p {
+		color: rgba(255, 255, 255, 0.8);
+		line-height: 1.6;
+		margin: 0;
+		font-size: 1rem;
+	}
+
+	/* Documentation Section */
+	.documentation-section {
+		padding: 4rem 2rem;
+		background: rgba(15, 17, 21, 0.3);
+		border-top: 1px solid rgba(0, 212, 255, 0.2);
+	}
+
+	.docs-container {
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.docs-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+		gap: 2rem;
+	}
+
+	.doc-card {
+		background: rgba(26, 29, 41, 0.6);
+		backdrop-filter: blur(20px);
+		border: 1px solid rgba(0, 212, 255, 0.2);
+		border-radius: 16px;
+		padding: 2rem;
+		text-decoration: none;
+		color: inherit;
+		transition: all 0.3s ease;
+		position: relative;
+		overflow: hidden;
+		display: flex;
+		align-items: flex-start;
+		gap: 1.5rem;
+	}
+
+	.doc-card::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 1px;
+		background: linear-gradient(90deg, transparent, #00D4FF, transparent);
+		opacity: 0;
+		transition: opacity 0.3s ease;
+	}
+
+	.doc-card:hover {
+		transform: translateY(-5px);
+		border-color: rgba(0, 212, 255, 0.4);
+		box-shadow: 0 20px 40px rgba(0, 212, 255, 0.1);
+		text-decoration: none;
+	}
+
+	.doc-card:hover::before {
+		opacity: 1;
+	}
+
+	.doc-card:hover .doc-arrow {
+		transform: translateX(5px);
+		color: #00D4FF;
+	}
+
+	.doc-icon {
+		font-size: 2.5rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 60px;
+		height: 60px;
+		background: rgba(0, 212, 255, 0.1);
+		border-radius: 12px;
+		flex-shrink: 0;
+		transition: all 0.3s ease;
+	}
+
+	.doc-card:hover .doc-icon {
+		background: rgba(0, 212, 255, 0.2);
+		transform: scale(1.1);
+	}
+
+	.doc-content {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.doc-content h3 {
+		color: #00D4FF;
+		font-size: 1.3rem;
+		font-weight: 600;
+		margin: 0 0 0.75rem 0;
+		line-height: 1.3;
+	}
+
+	.doc-content p {
+		color: rgba(255, 255, 255, 0.8);
+		line-height: 1.6;
+		margin: 0 0 1rem 0;
+		font-size: 0.95rem;
+	}
+
+	.doc-arrow {
+		color: rgba(255, 255, 255, 0.6);
+		font-size: 1.2rem;
+		font-weight: bold;
+		transition: all 0.3s ease;
+		display: inline-block;
+	}
+	.link-card-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));
+		gap: 2rem;
+		padding: 0;
+	}
+	
+	/* Demo Section */
+	.demo-section {
+		padding: 4rem 2rem;
+		background: rgba(15, 17, 21, 0.5);
+		border-top: 1px solid rgba(0, 212, 255, 0.2);
+	}
+
+	.demo-container {
+		max-width: 800px;
+		margin: 0 auto;
+	}
+
+	.demo-header {
+		text-align: center;
+		margin-bottom: 3rem;
+	}
+
+	.demo-icon {
+		font-size: 3rem;
+		margin-bottom: 1rem;
+		display: inline-block; 
+	}
+
+	@keyframes pulse {
+		0%, 100% { transform: scale(1); }
+		50% { transform: scale(1.1); }
+	}
+
+	.demo-header h2 {
+		font-size: 2.5rem;
+		font-weight: 700;
+		margin: 0 0 1rem 0;
+		background: linear-gradient(135deg, #00D4FF 0%, #0099CC 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
+
+	.demo-header p {
+		font-size: 1.1rem;
+		color: rgba(255, 255, 255, 0.8);
+		margin: 0;
+	}
+
+	.demo-form {
+		background: rgba(26, 29, 41, 0.8);
+		backdrop-filter: blur(20px);
+		border: 1px solid rgba(0, 212, 255, 0.3);
+		border-radius: 16px;
+		padding: 2.5rem;
+		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+	}
+
+	.form-group {
+		margin-bottom: 1.5rem;
+	}
+
+	.form-group label {
+		display: block;
+		margin-bottom: 0.75rem;
+		color: #00D4FF;
+		font-weight: 600;
+		font-size: 1rem;
+	}
+
+	.form-options {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1.5rem;
+		margin-bottom: 2rem;
+	}
+
+	.checkbox-label {
+		display: flex !important;
+		align-items: center;
+		cursor: pointer;
+		margin-bottom: 0 !important;
+	}
+
+	.checkbox-label input[type="checkbox"] {
+		display: none;
+	}
+
+	.checkmark {
+		width: 20px;
+		height: 20px;
+		border: 2px solid rgba(0, 212, 255, 0.5);
+		border-radius: 4px;
+		margin-right: 0.75rem;
+		position: relative;
+		transition: all 0.2s ease;
+	}
+
+	.checkbox-label input[type="checkbox"]:checked + .checkmark {
+		background: #00D4FF;
+		border-color: #00D4FF;
+	}
+
+	.checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+		content: '✓';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		color: white;
+		font-size: 12px;
+		font-weight: bold;
+	}
+
+	.form-group textarea,
+	.form-group select {
+		width: 100%;
+		padding: 1rem;
+		border: 2px solid rgba(0, 212, 255, 0.3);
+		border-radius: 8px;
+		background: rgba(15, 17, 21, 0.8);
+		color: white;
+		font-size: 1rem;
+		transition: all 0.2s ease;
+	}
+
+	.form-group textarea:focus,
+	.form-group select:focus {
+		outline: none;
+		border-color: #00D4FF;
+		box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+	}
+
+	.form-group textarea {
+		resize: vertical;
+		min-height: 100px;
+		font-family: inherit;
+	}
+
+	.btn-demo {
+		background: linear-gradient(135deg, #00D4FF 0%, #0099CC 100%);
+		color: white;
+		border: none;
+		padding: 1rem 2rem;
+		border-radius: 8px;
+		font-size: 1.1rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		width: 100%;
+		box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+	}
+
+	.btn-demo:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 15px 40px rgba(0, 212, 255, 0.4);
+	}
+
+	.btn-demo:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+		transform: none;
+	}
+
+	.btn-icon {
+		transition: transform 0.2s ease;
+	}
+
+	.btn-demo:hover .btn-icon {
+		transform: translateX(3px);
+	}
+
+	.response-area {
+		margin-top: 2rem;
+		background: rgba(15, 17, 21, 0.6);
+		border: 1px solid rgba(0, 212, 255, 0.2);
+		border-radius: 12px;
+		padding: 2rem;
+		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+	}
+
+	.response-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1.5rem;
+		padding-bottom: 1rem;
+		border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+	}
+
+	.response-header h3 {
+		color: #00D4FF;
+		margin: 0;
+		font-size: 1.5rem;
+		font-weight: 700;
+	}
+
+	.response-status {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		color: rgba(255, 255, 255, 0.7);
+		font-size: 0.9rem;
+	}
+
+	.status-indicator {
+		width: 8px;
+		height: 8px;
+		background: #00D4FF;
+		border-radius: 50%;
+		animation: pulse 2s infinite;
+	}
+
+	.response-content {
+		white-space: pre-wrap;
+		line-height: 1.7;
+		margin-bottom: 1.5rem;
+		color: rgba(255, 255, 255, 0.9);
+		font-size: 1.1rem;
+	}
+
+	.sources-area {
+		border-top: 1px solid rgba(0, 212, 255, 0.2);
+		padding-top: 1.5rem;
+	}
+
+	.sources-area h4 {
+		color: #00D4FF;
+		margin: 0 0 1rem 0;
+		font-size: 1.2rem;
+		font-weight: 600;
+	}
+
+	.sources-grid {
+		display: grid;
+		gap: 1rem;
+		font-size: 0.7rem;
+	}
+
+	.source-item {
+		background: rgba(0, 212, 255, 0.05);
+		border: 1px solid rgba(0, 212, 255, 0.2);
+		border-radius: 8px;
+		padding: 1rem;
+		transition: all 0.2s ease;
+	}
+
+	.source-item:hover {
+		background: rgba(0, 212, 255, 0.1);
+		border-color: rgba(0, 212, 255, 0.4);
+		transform: translateY(-2px);
+	}
+
+	.source-item a {
+		color: #00D4FF;
+		text-decoration: none;
+		font-weight: 600;
+		display: block;
+		margin-bottom: 0.5rem;
+	}
+
+	.source-item a:hover {
+		text-decoration: underline;
+	}
+
+	.source-snippet {
+		font-size: 0.9rem;
+		color: rgba(255, 255, 255, 0.7);
+		line-height: 1.5;
+	}
+	
+	/* Content Pages Styles */
+	.content-pages {
+		margin-top: 3rem;
+		padding-top: 2rem;
+		border-top: 1px solid rgba(var(--accent-light), 25%);
+	}
+	
+	.content-pages h2 {
+		color: rgb(var(--accent-light));
+		font-size: 2rem;
+		margin-bottom: 1.5rem;
+		text-align: center;
+	}
+	
+	.content-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));
+		gap: 2rem;
+		padding: 0;
+	}
+
+	/* Responsive Design */
+	@media (max-width: 768px) {
+		.hero-title {
+			font-size: 2.5rem;
+		}
+
+		.hero-subtitle {
+			font-size: 1.1rem;
+		}
+
+		.hero-actions {
+			flex-direction: column;
+			align-items: center;
+		}
+
+		.btn-primary-large, .btn-secondary-large {
+			width: 100%;
+			max-width: 300px;
+		}
+
+		.demo-section {
+			padding: 2rem 1rem;
+		}
+
+		.demo-form {
+			padding: 1.5rem;
+		}
+
+		.form-options {
+			grid-template-columns: 1fr;
+			gap: 1rem;
+		}
+
+		.demo-header h2 {
+			font-size: 2rem;
+		}
+
+		.features-section,
+		.tech-stack-section,
+		.documentation-section {
+			padding: 2rem 1rem;
+		}
+
+		.features-grid,
+		.stack-grid,
+		.docs-grid {
+			grid-template-columns: 1fr;
+			gap: 1.5rem;
+		}
+
+		.section-header h2 {
+			font-size: 2rem;
+		}
+
+		.section-header p {
+			font-size: 1.1rem;
+		}
+
+		.doc-card {
+			flex-direction: column;
+			text-align: center;
+			gap: 1rem;
+		}
+
+		.doc-icon {
+			margin: 0 auto;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.hero-title {
+			font-size: 2rem;
+		}
+
+		.hero-icon svg {
+			width: 80px;
+			height: 80px;
+		}
+
+		.demo-header h2 {
+			font-size: 1.75rem;
+		}
+
+		.response-header {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 0.5rem;
+		}
+	}
+</style>
+
+<script is:inline>
+	document.addEventListener('DOMContentLoaded', function() {
+		const form = document.getElementById('chatbot-form');
+		const submitBtn = document.getElementById('submit-btn');
+		const responseArea = document.getElementById('response');
+		const responseContent = document.getElementById('response-content');
+		const sourcesArea = document.getElementById('sources');
+		const sourcesContent = document.getElementById('sources-content');
+
+		form.addEventListener('submit', async function(e) {
+			e.preventDefault();
+			
+			const formData = new FormData(form);
+			const query = formData.get('query');
+			const stream = formData.get('stream') === 'on';
+			const language = "en";
+			
+			// Show loading state
+			submitBtn.disabled = true;
+			submitBtn.textContent = 'Sending...';
+			responseArea.style.display = 'block';
+			responseContent.textContent = 'Loading...';
+			sourcesArea.style.display = 'none';
+			
+			try {
+				const requestBody = {
+					query: query,
+					stream: stream,
+					language: language
+				};
+				
+				if (stream) {
+					// Handle streaming response
+					await handleStreamingResponse(requestBody);
+				} else {
+					// Handle non-streaming response
+					await handleNonStreamingResponse(requestBody);
+				}
+			} catch (error) {
+				console.error('Error:', error);
+				responseContent.textContent = `Error: ${error.message}`;
+			} finally {
+				// Reset button state
+				submitBtn.disabled = false;
+				submitBtn.textContent = 'Send Question';
+			}
+		});
+		
+		async function handleStreamingResponse(requestBody) {
+			const response = await fetch('/api/chatbot', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(requestBody)
+			});
+			
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+			
+			const reader = response.body?.getReader();
+			const decoder = new TextDecoder();
+			let sources = null;
+			let fullText = '';
+			let buffer = '';
+			
+			if (reader) {
+				while (true) {
+					const { done, value } = await reader.read();
+					if (done) break;
+					
+					// Add new data to buffer
+					buffer += decoder.decode(value, { stream: true });
+					
+					// Process complete lines
+					const lines = buffer.split('\n');
+					buffer = lines.pop() || ''; // Keep incomplete line in buffer
+					
+					for (const line of lines) {
+						if (line.startsWith('DATA:')) {
+							try {
+								const data = JSON.parse(line.slice(5));
+								
+								if (data.type === 'sources') {
+									sources = data.data;
+									displaySources(sources);
+								} else if (data.type === 'text') {
+									fullText += data.data;
+									responseContent.textContent = fullText;
+								} else if (data.type === 'end') {
+									// Stream completed
+									console.log('Stream completed');
+								} else if (data.type === 'error') {
+									console.error('Stream error:', data.data);
+									responseContent.textContent = `Error: ${data.data}`;
+								}
+							} catch (e) {
+								console.error('Error parsing stream data:', e, 'Line:', line);
+							}
+						}
+					}
+				}
+				
+				// Process any remaining data in buffer
+				if (buffer.trim()) {
+					const lines = buffer.split('\n');
+					for (const line of lines) {
+						if (line.startsWith('DATA:')) {
+							try {
+								const data = JSON.parse(line.slice(5));
+								
+								if (data.type === 'sources') {
+									sources = data.data;
+									displaySources(sources);
+								} else if (data.type === 'text') {
+									fullText += data.data;
+									responseContent.textContent = fullText;
+								}
+							} catch (e) {
+								console.error('Error parsing final buffer data:', e);
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		async function handleNonStreamingResponse(requestBody) {
+			const response = await fetch('/api/chatbot', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(requestBody)
+			});
+			
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+			
+			const data = await response.json();
+			
+			// Display response
+			responseContent.textContent = data.answer || 'No response received';
+			
+			// Display sources if available
+			if (data.sources && data.sources.length > 0) {
+				displaySources(data.sources);
+			}
+		}
+		
+		function displaySources(sources) {
+			sourcesArea.style.display = 'block';
+			sourcesContent.innerHTML = '';
+			
+			sources.forEach(source => {
+				const sourceDiv = document.createElement('div');
+				sourceDiv.className = 'source-item';
+				
+				const link = document.createElement('a');
+				link.href = source.url;
+				link.target = '_blank';
+				link.textContent = source.title || source.url;
+				
+				const snippet = document.createElement('div');
+				snippet.className = 'source-snippet';
+				snippet.textContent = source.snippet || '';
+				
+				sourceDiv.appendChild(link);
+				if (source.snippet) {
+					sourceDiv.appendChild(snippet);
+				}
+				
+				sourcesContent.appendChild(sourceDiv);
+			});
+		}
+	});
+</script>
