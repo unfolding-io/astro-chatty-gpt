@@ -11,7 +11,8 @@
 		}
 	},
 	"files": [
-		"dist"
+		"dist",
+		"assets"
 	],
 	"scripts": {
 		"dev": "tsup --watch",
@@ -37,7 +38,7 @@
 		"url": "git+https://github.com/unfolding-io/astro-chatty-gpt.git"
 	},
 	"bugs": "https://github.com/unfolding-io/astro-chatty-gpt/issues:",
-	"homepage": "https://chattygpt.unfolding.io",
+	"homepage": "https://astrochattygpt.unfolding.io",
 	"license": "MIT",
 	"peerDependencies": {
 		"astro": "^5.1.3"
