@@ -2,7 +2,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 import { createResolver } from "astro-integration-kit";
 import { hmrIntegration } from "astro-integration-kit/dev";
-
+import netlify from '@astrojs/netlify';
 import packageName from "../packages/astro-chatty-gpt/dist/index.js";
 import { loadEnv } from "vite";
 const env = loadEnv("", process.cwd(), "");
@@ -10,7 +10,8 @@ const env = loadEnv("", process.cwd(), "");
 
 // https://astro.build/config
 export default defineConfig({
-	site: "http://localhost:4321",
+	site: "http://astrochattygpt.unfolding.io",
+	adapter: netlify(),
 	integrations: [
 		packageName({
 			upstashUrl: env.UPSTASH_SEARCH_REST_URL,
