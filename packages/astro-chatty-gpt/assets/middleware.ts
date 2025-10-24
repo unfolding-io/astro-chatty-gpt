@@ -3,7 +3,7 @@ import { defineMiddleware } from "astro:middleware";
 import { options } from "virtual:astro-chatty-gpt/internal";
 import { openai } from "@ai-sdk/openai";
 import { streamText } from "ai";
-import { getSearchIndex } from "../src/upstash-search.js";
+import { getSearchIndex } from "../dist/upstash-search.js";
 
 // Type definitions
 interface SearchResult {
