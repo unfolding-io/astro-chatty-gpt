@@ -14,7 +14,6 @@ function getSearchIndex(
 		const token =
 			UPSTASH_SEARCH_REST_TOKEN || process.env.UPSTASH_SEARCH_REST_TOKEN;
 
-
 		if (!url || !token) {
 			throw new Error(
 				"UPSTASH_SEARCH_REST_URL and UPSTASH_SEARCH_REST_TOKEN environment variables are required!!!",

@@ -1,9 +1,12 @@
-
 import { openai } from "@ai-sdk/openai";
 import { streamText } from "ai";
 import type { AstroConfig } from "astro";
 import { z } from "astro/zod";
-import { defineIntegration } from "astro-integration-kit";
+import {
+	addVirtualImports,
+	createResolver,
+	defineIntegration,
+} from "astro-integration-kit";
 import type { ScrapedContent } from "./generate-search.js";
 import { scrapePagesFromFiles } from "./generate-search.js";
 import { getSearchIndex } from "./upstash-search.js";
@@ -12,14 +15,13 @@ import { getSearchIndex } from "./upstash-search.js";
 
 const DEFAULT_LANGUAGE = "en";
 const MAX_OUTPUT_TOKENS = 500;
-const SEARCH_LIMIT = 10; 
+const SEARCH_LIMIT = 10;
 const MAX_CONTEXT_DOCS = 10;
 const MAX_CONTENT_LENGTH = 2000;
 const SNIPPET_LIMIT = 200;
 const MIN_CONTEXT_LENGTH = 100;
 const DEFAULT_BOT_NAME = "ChattyGpt";
-const DEFAULT_SYSTEM_PROMPT =
-  `
+const DEFAULT_SYSTEM_PROMPT = `
   You are {bot_name} a website assistant for {site_name}.  
   - Always reply in professional human-friendly {language}.  
   - Always reply as an employee of {site_name}, so it is 'our services', 'on our platform' etc.
@@ -31,164 +33,194 @@ const DEFAULT_SYSTEM_PROMPT =
   - when showing links, max 3 results and always show:  
     - **Thumbnail** (if available) as a Markdown image '![alt text](image_url)'  
     - **Title** as a clickable Markdown link to the related page 
-        `
+        `;
 
 // Store config in a module-level variable
 let astroConfig: AstroConfig | undefined;
 
 // Define the Zod schema
 const optionsSchema = z.object({
-  upstashUrl: z.string(),
-  upstashToken: z.string(),
-  openAiKey: z.string(),
-  maxOutputTokens: z.number().optional(),
-  excludeRoutes: z.array(z.string()).optional(),
-  maxContextDocs: z.number().optional(),
-  maxContentLength: z.number().optional(),
-  contentTag: z.string().optional(),
-  searchLimit: z.number().optional(),
-  excludeTags: z.array(z.string()).optional(),
-  botName: z.string().optional(),
-  systemPrompt: z.string().optional(),
+	upstashUrl: z.string(),
+	upstashToken: z.string(),
+	openAiKey: z.string(),
+	maxOutputTokens: z.number().optional(),
+	excludeRoutes: z.array(z.string()).optional(),
+	maxContextDocs: z.number().optional(),
+	maxContentLength: z.number().optional(),
+	contentTag: z.string().optional(),
+	searchLimit: z.number().optional(),
+	excludeTags: z.array(z.string()).optional(),
+	botName: z.string().optional(),
+	systemPrompt: z.string().optional(),
 });
 
 // Export the inferred type
 export type AstroChattyOptions = z.infer<typeof optionsSchema>;
 
 export default defineIntegration({
-  name: "astro-chatty-gpt",
-  optionsSchema,
-  setup({ options }) {
-    return {
-      hooks: {
-        "astro:config:setup": () => {
-          
-          // Vite plugin setup can be added here if needed
-        },
-        "astro:config:done": async ({ config }) => {
-          astroConfig = config;
-        },
+	name: "astro-chatty-gpt",
+	optionsSchema,
+	setup({ options, name }) {
+		const { resolve } = createResolver(import.meta.url);
+		return {
+			hooks: {
+				"astro:config:setup": (params) => {
+					const { addMiddleware } = params;
 
-        "astro:build:done": async ({ assets, pages, logger }) => {
-      
-          if(!options.upstashUrl || !options.upstashToken || !options.openAiKey) {
-            logger.warn("Upstash URL + token + openAiKey are required for AstroChattyGpt integration. Skipping.");
-            return;
-          }
-          try {
-            const config = astroConfig;
-            if (!config?.site) {
-              logger.warn(
-                "AstroChattyGpt integration requires the `site` astro.config option. Skipping."
-              );
-              return;
-            }
+					addVirtualImports(params, {
+						name,
+						imports: [
+							{
+								id: "virtual:astro-chatty-gpt/internal",
+								content: `
+								export const options = ${JSON.stringify(options)};
+							`,
+							},
+						],
+					});
 
-            logger.info("Starting AstroChattyGpt content indexing...");
+					addMiddleware({
+						entrypoint: resolve("../assets/middleware.ts"),
+						order: "pre",
+					});
+				},
+				"astro:config:done": async ({ config }) => {
+					astroConfig = config;
+				},
 
-            // Get the build directory path
+				"astro:build:done": async ({ assets, pages, logger }) => {
+					if (
+						!options.upstashUrl ||
+						!options.upstashToken ||
+						!options.openAiKey
+					) {
+						logger.warn(
+							"Upstash URL + token + openAiKey are required for AstroChattyGpt integration. Skipping.",
+						);
+						return;
+					}
+					try {
+						const config = astroConfig;
+						if (!config?.site) {
+							logger.warn(
+								"AstroChattyGpt integration requires the `site` astro.config option. Skipping.",
+							);
+							return;
+						}
 
-            // Get all page routes from pages array
-            const allPages = pages.map((p) => p.pathname);
-             
-            // Filter pages based on exclude routes
-            const filteredPages = filterPages(allPages, options.excludeRoutes);
-            
-            
-            if (filteredPages.length === 0) {
-              logger.warn("No pages found after filtering excludeRoutes!");
-              return;
-            }
+						logger.info("Starting AstroChattyGpt content indexing...");
 
-            logger.info(`Found ${filteredPages.length} pages to process after filtering`);
-            
-            // Extract HTML file paths from assets Map for filtered pages
-            const htmlFiles: string[] = [];
-            for (const [route, urls] of assets) {
-              // Handle different route patterns
-              if (route === '/') {
-                // Root route - check if empty string is in filteredPages
-                if (filteredPages.includes('')) {
-                  const url = urls[0];
-                  if (url && url.pathname) {
-                    htmlFiles.push(url.pathname);
-                  }
-                }
-              } else if (route === '/[slug]') {
-                // Dynamic route - check all URLs against filtered pages
-                for (const url of urls) {
-                  if (url && url.pathname) {
-                    // Extract the slug from the pathname
-                    const pathname = url.pathname;
-                    const slug = pathname.split('/').slice(-2, -1)[0]; // Get the directory name before index.html
-                    
-                    // Check if this slug matches any filtered page
-                    const isIncluded = filteredPages.some(page => {
-                      if (page === '') return false; // Skip empty string for dynamic routes
-                      const normalizedPage = page.endsWith('/') ? page.slice(0, -1) : page;
-                      return normalizedPage === slug;
-                    });
-                    
-                    if (isIncluded) {
-                      htmlFiles.push(pathname);
-                    }
-                  }
-                }
-              } else {
-                // Static routes - check if route matches filtered pages
-                const normalizedRoute = route.startsWith('/') ? route.slice(1) : route;
-                const isIncluded = filteredPages.some(page => {
-                  const normalizedPage = page.endsWith('/') ? page.slice(0, -1) : page;
-                  return normalizedRoute === normalizedPage;
-                });
-                
-                if (isIncluded) {
-                  const url = urls[0];
-                  if (url && url.pathname) {
-                    htmlFiles.push(url.pathname);
-                  }
-                }
-              }
-            }
+						// Get the build directory path
 
-            if (htmlFiles.length === 0) {
-              logger.warn("No HTML files found in assets!");
-              return;
-            }
+						// Get all page routes from pages array
+						const allPages = pages.map((p) => p.pathname);
 
-            logger.info(`Found ${htmlFiles.length} HTML files to process`);
+						// Filter pages based on exclude routes
+						const filteredPages = filterPages(allPages, options.excludeRoutes);
 
-            // Process HTML files directly using file system
-            const scrapedContent = await scrapePagesFromFiles(
-              htmlFiles,
-              config.site,
-              "astro",
-                {
-                  maxContentLength: options.maxContentLength || MAX_CONTENT_LENGTH,
-                  contentTag: options.contentTag || "main",
-                  excludeTags: options.excludeTags || [],
-                }, 
-              logger,
-            );
+						if (filteredPages.length === 0) {
+							logger.warn("No pages found after filtering excludeRoutes!");
+							return;
+						}
 
-            if (scrapedContent.length === 0) {
-              logger.warn("No content was scraped from the files.");
-              return;
-            }
+						logger.info(
+							`Found ${filteredPages.length} pages to process after filtering`,
+						);
 
-            // Index content in Upstash
-            await indexContent(scrapedContent, logger, options);
+						// Extract HTML file paths from assets Map for filtered pages
+						const htmlFiles: string[] = [];
+						for (const [route, urls] of assets) {
+							// Handle different route patterns
+							if (route === "/") {
+								// Root route - check if empty string is in filteredPages
+								if (filteredPages.includes("")) {
+									const url = urls[0];
+									if (url && url.pathname) {
+										htmlFiles.push(url.pathname);
+									}
+								}
+							} else if (route === "/[slug]") {
+								// Dynamic route - check all URLs against filtered pages
+								for (const url of urls) {
+									if (url && url.pathname) {
+										// Extract the slug from the pathname
+										const pathname = url.pathname;
+										const slug = pathname.split("/").slice(-2, -1)[0]; // Get the directory name before index.html
 
-            logger.info(
-              `Successfully indexed ${scrapedContent.length} pages to Upstash search`
-            );
-          } catch (err) {
-            logger.error(`Error during AstroChattyGpt indexing: ${err}`);
-            throw err;
-          }
-        },
+										// Check if this slug matches any filtered page
+										const isIncluded = filteredPages.some((page) => {
+											if (page === "") return false; // Skip empty string for dynamic routes
+											const normalizedPage = page.endsWith("/")
+												? page.slice(0, -1)
+												: page;
+											return normalizedPage === slug;
+										});
 
-        "astro:server:setup": ({ server }) => {
+										if (isIncluded) {
+											htmlFiles.push(pathname);
+										}
+									}
+								}
+							} else {
+								// Static routes - check if route matches filtered pages
+								const normalizedRoute = route.startsWith("/")
+									? route.slice(1)
+									: route;
+								const isIncluded = filteredPages.some((page) => {
+									const normalizedPage = page.endsWith("/")
+										? page.slice(0, -1)
+										: page;
+									return normalizedRoute === normalizedPage;
+								});
+
+								if (isIncluded) {
+									const url = urls[0];
+									if (url && url.pathname) {
+										htmlFiles.push(url.pathname);
+									}
+								}
+							}
+						}
+
+						if (htmlFiles.length === 0) {
+							logger.warn("No HTML files found in assets!");
+							return;
+						}
+
+						logger.info(`Found ${htmlFiles.length} HTML files to process`);
+
+						// Process HTML files directly using file system
+						const scrapedContent = await scrapePagesFromFiles(
+							htmlFiles,
+							config.site,
+							"astro",
+							{
+								maxContentLength:
+									options.maxContentLength || MAX_CONTENT_LENGTH,
+								contentTag: options.contentTag || "main",
+								excludeTags: options.excludeTags || [],
+							},
+							logger,
+						);
+
+						if (scrapedContent.length === 0) {
+							logger.warn("No content was scraped from the files.");
+							return;
+						}
+
+						// Index content in Upstash
+						await indexContent(scrapedContent, logger, options);
+
+						logger.info(
+							`Successfully indexed ${scrapedContent.length} pages to Upstash search`,
+						);
+					} catch (err) {
+						logger.error(`Error during AstroChattyGpt indexing: ${err}`);
+						throw err;
+					}
+				},
+
+				/* "astro:server:setup": ({ server }) => {
           server.middlewares.use("/api/chatbot", async (req, res) => {
             if(!options.upstashUrl || !options.upstashToken || !options.openAiKey) {
               res.statusCode = 500;
@@ -411,184 +443,186 @@ export default defineIntegration({
               res.end(JSON.stringify({ error: "Failed to process query" }));
             }
           });
-        },
-      },
-    };
-  },
+        }, */
+			},
+		};
+	},
 });
 
 // Helper function to transform search result documents
 function transformDocument(result: any) {
-  const title =
-    result.metadata?.title || result.metadata?.pageTitle || "Untitled";
-  const description = result.metadata?.description || "";
-  const url = result.metadata?.url || result.metadata?.sourceURL || "";
-  const thumbnail = result.metadata?.ogImage || "";
-  const rawContent = result.metadata?.fullContent || result.content?.text || "";
+	const title =
+		result.metadata?.title || result.metadata?.pageTitle || "Untitled";
+	const description = result.metadata?.description || "";
+	const url = result.metadata?.url || result.metadata?.sourceURL || "";
+	const thumbnail = result.metadata?.ogImage || "";
+	const rawContent = result.metadata?.fullContent || result.content?.text || "";
 
-  const structuredContent = `TITLE: ${title}
+	const structuredContent = `TITLE: ${title}
 DESCRIPTION: ${description}
 SOURCE: ${url}
 
 ${rawContent}`;
 
-  return {
-    content: structuredContent,
-    url,
-    title,
-    thumbnail,
-    description,
-    score: result.score || 0,
-  };
+	return {
+		content: structuredContent,
+		url,
+		title,
+		thumbnail,
+		description,
+		score: result.score || 0,
+	};
 }
 
 // Helper function to create source objects
 function createSource(doc: any) {
-  return {
-    url: doc.url,
-    title: doc.title,
-    thumbnail: doc.thumbnail,
-    snippet: (doc.content || "").substring(0, SNIPPET_LIMIT) + "...",
-  };
+	return {
+		url: doc.url,
+		title: doc.title,
+		thumbnail: doc.thumbnail,
+		snippet: (doc.content || "").substring(0, SNIPPET_LIMIT) + "...",
+	};
 }
 
 // Helper function to handle streaming responses
 async function handleStreamingResponse(
-  res: any,
-  messages: any[],
-  sources: any[],
-  options: AstroChattyOptions,
+	res: any,
+	messages: any[],
+	sources: any[],
+	options: AstroChattyOptions,
 ) {
-  const result = await streamText({
-    model: openai("gpt-5"),
-    maxOutputTokens: options?.maxOutputTokens || MAX_OUTPUT_TOKENS ,
-    providerOptions: {
-      openai: { 
-        reasoningEffort: "minimal",
-        textVerbosity: "low", // 'low' for concise, 'medium' (default), or 'high' for verbose
-      },
-    },
-    messages,
-  });
+	const result = await streamText({
+		model: openai("gpt-5"),
+		maxOutputTokens: options?.maxOutputTokens || MAX_OUTPUT_TOKENS,
+		providerOptions: {
+			openai: {
+				reasoningEffort: "minimal",
+				textVerbosity: "low", // 'low' for concise, 'medium' (default), or 'high' for verbose
+			},
+		},
+		messages,
+	});
 
-  const encoder = new TextEncoder();
-  const stream = new ReadableStream({
-    async start(controller) {
-      try {
-        // Send sources as a complete JSON object with delimiter
-        const sourcesData = { type: "sources", data: sources };
-        const sourcesLine = `DATA:${JSON.stringify(sourcesData)}\n`;
-        controller.enqueue(encoder.encode(sourcesLine));
-        
-        // Stream the text with proper delimiters
-        for await (const part of result.fullStream) {
-          if (part.type === "text-delta") {
-            const textData = { type: "text", data: part.text };
-            const textLine = `DATA:${JSON.stringify(textData)}\n`;
-            controller.enqueue(encoder.encode(textLine));
-          }
-        }
-        
-        // Send completion signal
-        const endData = { type: "end", data: "" };
-        const endLine = `DATA:${JSON.stringify(endData)}\n`;
-        controller.enqueue(encoder.encode(endLine));
-      } catch (streamError) {
-        console.error("Stream processing failed", streamError);
-        const errorData = { type: "error", data: "Stream processing failed" };
-        const errorLine = `DATA:${JSON.stringify(errorData)}\n`;
-        controller.enqueue(encoder.encode(errorLine));
-      }
+	const encoder = new TextEncoder();
+	const stream = new ReadableStream({
+		async start(controller) {
+			try {
+				// Send sources as a complete JSON object with delimiter
+				const sourcesData = { type: "sources", data: sources };
+				const sourcesLine = `DATA:${JSON.stringify(sourcesData)}\n`;
+				controller.enqueue(encoder.encode(sourcesLine));
 
-      controller.close();
-    },
-  });
+				// Stream the text with proper delimiters
+				for await (const part of result.fullStream) {
+					if (part.type === "text-delta") {
+						const textData = { type: "text", data: part.text };
+						const textLine = `DATA:${JSON.stringify(textData)}\n`;
+						controller.enqueue(encoder.encode(textLine));
+					}
+				}
 
-  res.setHeader("Content-Type", "text/plain; charset=utf-8");
-  const reader = stream.getReader();
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    res.write(value);
-  }
-  res.end();
+				// Send completion signal
+				const endData = { type: "end", data: "" };
+				const endLine = `DATA:${JSON.stringify(endData)}\n`;
+				controller.enqueue(encoder.encode(endLine));
+			} catch (streamError) {
+				console.error("Stream processing failed", streamError);
+				const errorData = { type: "error", data: "Stream processing failed" };
+				const errorLine = `DATA:${JSON.stringify(errorData)}\n`;
+				controller.enqueue(encoder.encode(errorLine));
+			}
+
+			controller.close();
+		},
+	});
+
+	res.setHeader("Content-Type", "text/plain; charset=utf-8");
+	const reader = stream.getReader();
+	while (true) {
+		const { done, value } = await reader.read();
+		if (done) break;
+		res.write(value);
+	}
+	res.end();
 }
 
 // Helper function to handle non-streaming responses
 async function handleNonStreamingResponse(
-  res: any,
-  messages: any[],
-  sources: any[],
-  options: AstroChattyOptions,
+	res: any,
+	messages: any[],
+	sources: any[],
+	options: AstroChattyOptions,
 ) {
-  const result = await streamText({
-    model: openai("gpt-5"),
-    maxOutputTokens: options?.maxOutputTokens || MAX_OUTPUT_TOKENS ,
-    providerOptions: {
-      openai: { 
-        reasoningEffort: "minimal",
-        textVerbosity: "low", // 'low' for concise, 'medium' (default), or 'high' for verbose
-      },
-    },
-    messages,
-  });
+	const result = await streamText({
+		model: openai("gpt-5"),
+		maxOutputTokens: options?.maxOutputTokens || MAX_OUTPUT_TOKENS,
+		providerOptions: {
+			openai: {
+				reasoningEffort: "minimal",
+				textVerbosity: "low", // 'low' for concise, 'medium' (default), or 'high' for verbose
+			},
+		},
+		messages,
+	});
 
-  // Get the full text
-  let answer = "";
-  for await (const textPart of result.textStream) {
-    answer += textPart;
-  }
+	// Get the full text
+	let answer = "";
+	for await (const textPart of result.textStream) {
+		answer += textPart;
+	}
 
-  res.setHeader("Content-Type", "application/json");
-  res.end(JSON.stringify({ answer, sources }));
+	res.setHeader("Content-Type", "application/json");
+	res.end(JSON.stringify({ answer, sources }));
 }
 
-
 // Helper function to filter pages based on exclude routes
-function filterPages(
-  pages: string[],
-  excludeRoutes?: string[]
-): string[] {
-  return pages.filter((page) => {
-    // Apply exclude routes
-    if (excludeRoutes?.length && excludeRoutes.some((route) => page.includes(route))) {
-      return false;
-    }
+function filterPages(pages: string[], excludeRoutes?: string[]): string[] {
+	return pages.filter((page) => {
+		// Apply exclude routes
+		if (
+			excludeRoutes?.length &&
+			excludeRoutes.some((route) => page.includes(route))
+		) {
+			return false;
+		}
 
-    return true;
-  });
+		return true;
+	});
 }
 
 // Helper function to index content in Upstash
 async function indexContent(
-  scrapedContent: ScrapedContent[],
-  logger: any,
-  options: AstroChattyOptions,
+	scrapedContent: ScrapedContent[],
+	logger: any,
+	options: AstroChattyOptions,
 ): Promise<void> {
-  try {
-    const searchIndex = getSearchIndex(options.upstashUrl , options.upstashToken );
-    await searchIndex.reset();
+	try {
+		const searchIndex = getSearchIndex(
+			options.upstashUrl,
+			options.upstashToken,
+		);
+		await searchIndex.reset();
 
-    const documents = scrapedContent.map((item) => ({
-      id: item.id,
-      content: {
-        text: item.content.text,
-        url: item.content.url,
-        title: item.content.title,
-        language: item.content.language,
-      },
-      metadata: item.metadata,
-    }));
+		const documents = scrapedContent.map((item) => ({
+			id: item.id,
+			content: {
+				text: item.content.text,
+				url: item.content.url,
+				title: item.content.title,
+				language: item.content.language,
+			},
+			metadata: item.metadata,
+		}));
 
-    // Use batching to avoid type issues
-    const batchSize = 10;
-    for (let i = 0; i < documents.length; i += batchSize) {
-      const batch = documents.slice(i, i + batchSize);
-      await searchIndex.upsert(batch);
-    }
-    logger.info(`Indexed ${documents.length} documents to Upstash search`);
-  } catch (error) {
-    logger.error(`Error indexing content to Upstash: ${error}`);
-    throw error;
-  }
+		// Use batching to avoid type issues
+		const batchSize = 10;
+		for (let i = 0; i < documents.length; i += batchSize) {
+			const batch = documents.slice(i, i + batchSize);
+			await searchIndex.upsert(batch);
+		}
+		logger.info(`Indexed ${documents.length} documents to Upstash search`);
+	} catch (error) {
+		logger.error(`Error indexing content to Upstash: ${error}`);
+		throw error;
+	}
 }

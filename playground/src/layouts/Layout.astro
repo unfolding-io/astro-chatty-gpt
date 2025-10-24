@@ -1,8 +1,8 @@
 ---
 
-import { getCollection } from 'astro:content';
-import type { CollectionEntry } from 'astro:content';
-import "../styles/global.css"; 
+import type { CollectionEntry } from "astro:content";
+import { getCollection } from "astro:content";
+import "../styles/global.css";
 
 interface Props {
 	title: string;
@@ -15,22 +15,23 @@ const { title, description, thumbnail } = Astro.props;
 const links = [
 	{
 		name: "Home",
-		href: "/"
+		href: "/",
 	},
 	{
 		name: "Getting Started",
-		href: "/getting-started"
+		href: "/getting-started",
 	},
-	
+
 	{
 		name: "Chat Widget",
-		href: "/using-our-chat-widget"
-	}
-]
+		href: "/using-our-chat-widget",
+	},
+];
 
-
-const posts = await getCollection('pages');
-const sortedPosts = posts.sort((a, b) => (b.data.order || 0) - (a.data.order || 0)); 
+const posts = await getCollection("pages");
+const sortedPosts = posts.sort(
+	(a, b) => (b.data.order || 0) - (a.data.order || 0),
+);
 ---
 
 <!doctype html>

@@ -104,7 +104,7 @@ export async function scrapePagesFromFiles(
 			logger.warn(`Skipping undefined file path at index ${index}`);
 			continue;
 		}
-		
+
 		try {
 			//logger.info(`Reading file: ${filePath}`);
 			const html = readFileSync(filePath, "utf-8");
@@ -130,7 +130,8 @@ export async function scrapePagesFromFiles(
 				results.push(scraped);
 			}
 		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : String(error);
+			const errorMessage =
+				error instanceof Error ? error.message : String(error);
 			logger.warn(`Error processing file ${filePath}: ${errorMessage}`);
 		}
 	}
@@ -199,7 +200,9 @@ async function extractContent(
 			?.getAttribute("content") || "";
 
 	// Extract headings
-	const headings = Array.from(document.querySelectorAll("h1, h2, h3, h4, h5, h6"))
+	const headings = Array.from(
+		document.querySelectorAll("h1, h2, h3, h4, h5, h6"),
+	)
 		.map((h) => (h as Element).textContent?.trim())
 		.filter(Boolean) as string[];
 
@@ -253,16 +256,27 @@ async function extractMarkdownContent(
 
 			// Remove unwanted elements from the cloned element
 			const unwantedSelectors = [
-				"script", "style", "nav", "header", "footer", "aside", "noscript",
-				".advertisement", ".ads", ".sidebar", ".menu"
+				"script",
+				"style",
+				"nav",
+				"header",
+				"footer",
+				"aside",
+				"noscript",
+				".advertisement",
+				".ads",
+				".sidebar",
+				".menu",
 			];
-			
+
 			// Add custom exclude tags
 			if (options.excludeTags && options.excludeTags.length > 0) {
 				unwantedSelectors.push(...options.excludeTags);
 			}
-			
-			const unwantedElements = clonedElement.querySelectorAll(unwantedSelectors.join(", "));
+
+			const unwantedElements = clonedElement.querySelectorAll(
+				unwantedSelectors.join(", "),
+			);
 			unwantedElements.forEach((el) => el.remove());
 
 			content = await htmlToMarkdown({ html: clonedElement.outerHTML });
@@ -278,16 +292,27 @@ async function extractMarkdownContent(
 
 			// Remove unwanted elements
 			const unwantedSelectors = [
-				"script", "style", "nav", "header", "footer", "aside", "noscript",
-				".advertisement", ".ads", ".sidebar", ".menu"
+				"script",
+				"style",
+				"nav",
+				"header",
+				"footer",
+				"aside",
+				"noscript",
+				".advertisement",
+				".ads",
+				".sidebar",
+				".menu",
 			];
-			
+
 			// Add custom exclude tags
 			if (options.excludeTags && options.excludeTags.length > 0) {
 				unwantedSelectors.push(...options.excludeTags);
 			}
-			
-			const unwantedElements = clonedBody.querySelectorAll(unwantedSelectors.join(", "));
+
+			const unwantedElements = clonedBody.querySelectorAll(
+				unwantedSelectors.join(", "),
+			);
 			unwantedElements.forEach((el) => el.remove());
 
 			content = await htmlToMarkdown({ html: clonedBody.outerHTML });

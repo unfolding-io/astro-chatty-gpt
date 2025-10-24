@@ -1,10 +1,12 @@
 --- 
+import type { CollectionEntry } from "astro:content";
+import { getCollection } from "astro:content";
 import Layout from "../layouts/Layout.astro";
-import { getCollection } from 'astro:content';
-import type { CollectionEntry } from 'astro:content';
 
-const posts = await getCollection('pages');
-const sortedPosts = posts.sort((a, b) => (b.data.order || 0) - (a.data.order || 0)); 
+const posts = await getCollection("pages");
+const sortedPosts = posts.sort(
+	(a, b) => (b.data.order || 0) - (a.data.order || 0),
+);
 ---
 
 <Layout title="Welcome to Astro." thumbnail="/home.png" description="Welcome to Astro. This is a playground for the Astro Chatty GPT package.">
