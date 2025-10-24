@@ -209,7 +209,7 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
 			}
 
 			// Handle both direct query format and useChat format
-			let query = requestBody.query;
+			let query: string = requestBody.query;
 			const stream = requestBody.stream ?? false;
 			const lang = (requestBody.language as string) ?? DEFAULT_LANGUAGE;
 

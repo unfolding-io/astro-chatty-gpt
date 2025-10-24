@@ -1,5 +1,3 @@
-import { openai } from "@ai-sdk/openai";
-import { streamText } from "ai";
 import type { AstroConfig } from "astro";
 import { z } from "astro/zod";
 import {
@@ -12,28 +10,7 @@ import { scrapePagesFromFiles } from "./generate-search.js";
 import { getSearchIndex } from "./upstash-search.js";
 
 // Constants
-
-const DEFAULT_LANGUAGE = "en";
-const MAX_OUTPUT_TOKENS = 500;
-const SEARCH_LIMIT = 10;
-const MAX_CONTEXT_DOCS = 10;
 const MAX_CONTENT_LENGTH = 2000;
-const SNIPPET_LIMIT = 200;
-const MIN_CONTEXT_LENGTH = 100;
-const DEFAULT_BOT_NAME = "ChattyGpt";
-const DEFAULT_SYSTEM_PROMPT = `
-  You are {bot_name} a website assistant for {site_name}.  
-  - Always reply in professional human-friendly {language}.  
-  - Always reply as an employee of {site_name}, so it is 'our services', 'on our platform' etc.
-  - Always return your entire response as **a single Markdown-formatted string** that can be rendered directly, don't use nested lists.  
-  - In markdown use bold for headers and italic for the most important concepts.
-  - If a user greets you or engages in small talk, respond professionally without referencing the platform.  
-  - For questions, answer using **ONLY** the provided context below. Do not use any other knowledge. If the context isn't sufficient to answer, say so explicitly.  
-  - When you include a URL, make it a **Markdown link** like '[titel](https://example.com)'.  
-  - when showing links, max 3 results and always show:  
-    - **Thumbnail** (if available) as a Markdown image '![alt text](image_url)'  
-    - **Title** as a clickable Markdown link to the related page 
-        `;
 
 // Store config in a module-level variable
 let astroConfig: AstroConfig | undefined;
@@ -136,13 +113,13 @@ export default defineIntegration({
 								if (filteredPages.includes("")) {
 									const url = urls[0];
 									if (url && url.pathname) {
-										htmlFiles.push(url.pathname);
+										htmlFiles.push(url?.pathname);
 									}
 								}
 							} else if (route === "/[slug]") {
 								// Dynamic route - check all URLs against filtered pages
 								for (const url of urls) {
-									if (url && url.pathname) {
+									if (url?.pathname) {
 										// Extract the slug from the pathname
 										const pathname = url.pathname;
 										const slug = pathname.split("/").slice(-2, -1)[0]; // Get the directory name before index.html
@@ -176,7 +153,7 @@ export default defineIntegration({
 								if (isIncluded) {
 									const url = urls[0];
 									if (url && url.pathname) {
-										htmlFiles.push(url.pathname);
+										htmlFiles.push(url?.pathname);
 									}
 								}
 							}
@@ -193,6 +170,7 @@ export default defineIntegration({
 						const scrapedContent = await scrapePagesFromFiles(
 							htmlFiles,
 							config.site,
+							logger,
 							"astro",
 							{
 								maxContentLength:
@@ -200,7 +178,6 @@ export default defineIntegration({
 								contentTag: options.contentTag || "main",
 								excludeTags: options.excludeTags || [],
 							},
-							logger,
 						);
 
 						if (scrapedContent.length === 0) {
@@ -448,132 +425,6 @@ export default defineIntegration({
 		};
 	},
 });
-
-// Helper function to transform search result documents
-function transformDocument(result: any) {
-	const title =
-		result.metadata?.title || result.metadata?.pageTitle || "Untitled";
-	const description = result.metadata?.description || "";
-	const url = result.metadata?.url || result.metadata?.sourceURL || "";
-	const thumbnail = result.metadata?.ogImage || "";
-	const rawContent = result.metadata?.fullContent || result.content?.text || "";
-
-	const structuredContent = `TITLE: ${title}
-DESCRIPTION: ${description}
-SOURCE: ${url}
-
-${rawContent}`;
-
-	return {
-		content: structuredContent,
-		url,
-		title,
-		thumbnail,
-		description,
-		score: result.score || 0,
-	};
-}
-
-// Helper function to create source objects
-function createSource(doc: any) {
-	return {
-		url: doc.url,
-		title: doc.title,
-		thumbnail: doc.thumbnail,
-		snippet: (doc.content || "").substring(0, SNIPPET_LIMIT) + "...",
-	};
-}
-
-// Helper function to handle streaming responses
-async function handleStreamingResponse(
-	res: any,
-	messages: any[],
-	sources: any[],
-	options: AstroChattyOptions,
-) {
-	const result = await streamText({
-		model: openai("gpt-5"),
-		maxOutputTokens: options?.maxOutputTokens || MAX_OUTPUT_TOKENS,
-		providerOptions: {
-			openai: {
-				reasoningEffort: "minimal",
-				textVerbosity: "low", // 'low' for concise, 'medium' (default), or 'high' for verbose
-			},
-		},
-		messages,
-	});
-
-	const encoder = new TextEncoder();
-	const stream = new ReadableStream({
-		async start(controller) {
-			try {
-				// Send sources as a complete JSON object with delimiter
-				const sourcesData = { type: "sources", data: sources };
-				const sourcesLine = `DATA:${JSON.stringify(sourcesData)}\n`;
-				controller.enqueue(encoder.encode(sourcesLine));
-
-				// Stream the text with proper delimiters
-				for await (const part of result.fullStream) {
-					if (part.type === "text-delta") {
-						const textData = { type: "text", data: part.text };
-						const textLine = `DATA:${JSON.stringify(textData)}\n`;
-						controller.enqueue(encoder.encode(textLine));
-					}
-				}
-
-				// Send completion signal
-				const endData = { type: "end", data: "" };
-				const endLine = `DATA:${JSON.stringify(endData)}\n`;
-				controller.enqueue(encoder.encode(endLine));
-			} catch (streamError) {
-				console.error("Stream processing failed", streamError);
-				const errorData = { type: "error", data: "Stream processing failed" };
-				const errorLine = `DATA:${JSON.stringify(errorData)}\n`;
-				controller.enqueue(encoder.encode(errorLine));
-			}
-
-			controller.close();
-		},
-	});
-
-	res.setHeader("Content-Type", "text/plain; charset=utf-8");
-	const reader = stream.getReader();
-	while (true) {
-		const { done, value } = await reader.read();
-		if (done) break;
-		res.write(value);
-	}
-	res.end();
-}
-
-// Helper function to handle non-streaming responses
-async function handleNonStreamingResponse(
-	res: any,
-	messages: any[],
-	sources: any[],
-	options: AstroChattyOptions,
-) {
-	const result = await streamText({
-		model: openai("gpt-5"),
-		maxOutputTokens: options?.maxOutputTokens || MAX_OUTPUT_TOKENS,
-		providerOptions: {
-			openai: {
-				reasoningEffort: "minimal",
-				textVerbosity: "low", // 'low' for concise, 'medium' (default), or 'high' for verbose
-			},
-		},
-		messages,
-	});
-
-	// Get the full text
-	let answer = "";
-	for await (const textPart of result.textStream) {
-		answer += textPart;
-	}
-
-	res.setHeader("Content-Type", "application/json");
-	res.end(JSON.stringify({ answer, sources }));
-}
 
 // Helper function to filter pages based on exclude routes
 function filterPages(pages: string[], excludeRoutes?: string[]): string[] {

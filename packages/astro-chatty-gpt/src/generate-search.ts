@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import htmlToMarkdown from "@wcj/html-to-markdown";
+import type { AstroIntegrationLogger } from "astro";
 import { JSDOM } from "jsdom";
 
 export interface ScrapedContent {
@@ -36,9 +37,9 @@ interface ScrapeOptions {
 export async function scrapePages(
 	pages: string[],
 	siteUrl: string,
-	namespace = "astro",
+	namespace: string,
+	logger: AstroIntegrationLogger,
 	options: ScrapeOptions = {},
-	logger: any,
 ): Promise<ScrapedContent[]> {
 	const results: ScrapedContent[] = [];
 
@@ -85,9 +86,9 @@ export async function scrapePages(
 export async function scrapePagesFromFiles(
 	htmlFiles: string[],
 	siteUrl: string,
+	logger: any,
 	namespace = "astro",
 	options: ScrapeOptions = {},
-	logger: any,
 ): Promise<ScrapedContent[]> {
 	const results: ScrapedContent[] = [];
 
@@ -277,7 +278,9 @@ async function extractMarkdownContent(
 			const unwantedElements = clonedElement.querySelectorAll(
 				unwantedSelectors.join(", "),
 			);
-			unwantedElements.forEach((el) => el.remove());
+			unwantedElements.forEach((el) => {
+				el.remove();
+			});
 
 			content = await htmlToMarkdown({ html: clonedElement.outerHTML });
 		}
@@ -313,7 +316,9 @@ async function extractMarkdownContent(
 			const unwantedElements = clonedBody.querySelectorAll(
 				unwantedSelectors.join(", "),
 			);
-			unwantedElements.forEach((el) => el.remove());
+			unwantedElements.forEach((el) => {
+				el.remove();
+			});
 
 			content = await htmlToMarkdown({ html: clonedBody.outerHTML });
 		}
@@ -330,7 +335,7 @@ function cleanContent(
 	options: Required<ScrapeOptions>,
 ): string {
 	// Clean up markdown formatting
-	content = content
+	const cleanedContent = content
 		// Remove excessive whitespace but preserve markdown structure
 		.replace(/\n{3,}/g, "\n\n") // Replace 3+ newlines with 2
 		.replace(/[ \t]+$/gm, "") // Remove trailing spaces from lines
@@ -340,9 +345,9 @@ function cleanContent(
 		.replace(/\n+$/, "");
 
 	// Limit content length
-	if (content.length > options.maxContentLength) {
-		content = content.substring(0, options.maxContentLength) + "...";
+	if (cleanedContent.length > options.maxContentLength) {
+		return cleanedContent.substring(0, options.maxContentLength) + "...";
 	}
 
-	return content;
+	return cleanedContent;
 }
