@@ -1,4 +1,4 @@
-# astro-chatty-gpt
+# astro-chatty-gpt (WIP)
 
 A simple chatbot api for your Astro site. Powered by Upstash search, gpt-5 and AI-sdk.
 

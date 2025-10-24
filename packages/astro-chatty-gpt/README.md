@@ -1,4 +1,4 @@
-# `astro-chatty-gpt`
+# `astro-chatty-gpt` (WIP)
 
 An [Astro integration](https://docs.astro.build/en/guides/integrations-guide/) that adds AI-powered search and chat functionality to your Astro website using Upstash Search and OpenAI.
 
@@ -21,7 +21,7 @@ Before using this integration, you'll need:
 1. **Upstash Account**: Sign up at [upstash.com](https://upstash.com) and create a Search Database
 2. **OpenAI API Key**: Get your API key from [platform.openai.com](https://platform.openai.com)
 
-### Installation
+### Installation (WIP)
 
 Install the integration **automatically** using the Astro CLI:
 
