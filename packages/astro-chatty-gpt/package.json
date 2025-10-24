@@ -31,9 +31,9 @@
 	"author": "unfolding.io",
 	"repository": {
 		"type": "git",
-		"url": "git+TODO:.git"
+		"url": "git+https://github.com/unfolding-io/astro-chatty-gpt.git"
 	},
-	"bugs": "TODO:",
+	"bugs": "https://github.com/unfolding-io/astro-chatty-gpt/issues:",
 	"homepage": "https://chattygpt.unfolding.io",
 	"license": "MIT",
 	"peerDependencies": {
