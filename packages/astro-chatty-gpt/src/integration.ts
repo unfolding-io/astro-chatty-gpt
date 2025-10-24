@@ -1,4 +1,4 @@
-import type { AstroConfig } from "astro";
+import type { AstroConfig, AstroIntegrationLogger } from "astro";
 import { z } from "astro/zod";
 import {
 	addVirtualImports,
@@ -112,7 +112,7 @@ export default defineIntegration({
 								// Root route - check if empty string is in filteredPages
 								if (filteredPages.includes("")) {
 									const url = urls[0];
-									if (url && url.pathname) {
+									if (url?.pathname) {
 										htmlFiles.push(url?.pathname);
 									}
 								}
@@ -152,7 +152,7 @@ export default defineIntegration({
 
 								if (isIncluded) {
 									const url = urls[0];
-									if (url && url.pathname) {
+									if (url?.pathname) {
 										htmlFiles.push(url?.pathname);
 									}
 								}
@@ -444,7 +444,7 @@ function filterPages(pages: string[], excludeRoutes?: string[]): string[] {
 // Helper function to index content in Upstash
 async function indexContent(
 	scrapedContent: ScrapedContent[],
-	logger: any,
+	logger: AstroIntegrationLogger,
 	options: AstroChattyOptions,
 ): Promise<void> {
 	try {
@@ -452,6 +452,9 @@ async function indexContent(
 			options.upstashUrl,
 			options.upstashToken,
 		);
+		if (!searchIndex) {
+			throw new Error("Failed to initialize search index");
+		}
 		await searchIndex.reset();
 
 		const documents = scrapedContent.map((item) => ({

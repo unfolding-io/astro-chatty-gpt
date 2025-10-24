@@ -5,6 +5,42 @@ import { openai } from "@ai-sdk/openai";
 import { streamText } from "ai";
 import { getSearchIndex } from "../src/upstash-search.js";
 
+// Type definitions
+interface SearchResult {
+	metadata?: {
+		title?: string;
+		pageTitle?: string;
+		description?: string;
+		url?: string;
+		sourceURL?: string;
+		ogImage?: string;
+		fullContent?: string;
+	};
+	content?: {
+		text?: string;
+	};
+	score?: number;
+}
+
+interface ChatMessage {
+	role: "system" | "user" | "assistant";
+	content: string;
+}
+
+interface Source {
+	url: string;
+	title: string;
+	thumbnail: string;
+	snippet: string;
+}
+
+interface RequestBody {
+	query?: string;
+	stream?: boolean;
+	language?: string;
+	messages?: ChatMessage[];
+}
+
 // Constants
 const DEFAULT_LANGUAGE = "en";
 const MAX_OUTPUT_TOKENS = 500;
@@ -79,10 +115,10 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
 			}
 
 			// Get the search index
-			let searchIndex;
+			let searchIndex: ReturnType<typeof getSearchIndex>;
 			try {
 				searchIndex = getSearchIndex(options.upstashUrl, options.upstashToken);
-			} catch (indexError) {
+			} catch (_indexError) {
 				return new Response(
 					JSON.stringify({ error: "Search service unavailable" }),
 					{
@@ -93,16 +129,16 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
 			}
 
 			// Search for documents
-			let documents: any[] = [];
+			let documents: SearchResult[] = [];
 			try {
-				const searchResults = await searchIndex.search({
+				const searchResults = await searchIndex?.search({
 					query: query.trim(),
 					limit: 20, // Top 20 results
 					reranking: true,
 				});
 
 				documents = searchResults || [];
-			} catch (searchError) {
+			} catch (_searchError) {
 				return new Response(JSON.stringify({ error: "Search failed" }), {
 					status: 500,
 					headers: { "Content-Type": "application/json" },
@@ -134,7 +170,7 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
 					},
 				},
 			);
-		} catch (error) {
+		} catch (_error) {
 			return new Response(
 				JSON.stringify({ error: "Failed to process search request" }),
 				{
@@ -195,10 +231,10 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
 				);
 			}
 
-			let requestBody;
+			let requestBody: RequestBody;
 			try {
 				requestBody = JSON.parse(body);
-			} catch (parseError) {
+			} catch (_parseError) {
 				return new Response(
 					JSON.stringify({ error: "Invalid JSON in request body" }),
 					{
@@ -209,7 +245,7 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
 			}
 
 			// Handle both direct query format and useChat format
-			let query: string = requestBody.query;
+			let query: string = requestBody.query || "";
 			const stream = requestBody.stream ?? false;
 			const lang = (requestBody.language as string) ?? DEFAULT_LANGUAGE;
 
@@ -222,7 +258,7 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
 				const lastUserMessage = requestBody.messages
 					.filter((m: { role: string }) => m.role === "user")
 					.pop();
-				query = lastUserMessage?.content;
+				query = lastUserMessage?.content || "";
 			}
 
 			const messagesHistory = requestBody?.messages?.slice(-3, -1) || [];
@@ -238,10 +274,10 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
 			}
 
 			// Get the search index using stored environment variables
-			let searchIndex;
+			let searchIndex: ReturnType<typeof getSearchIndex>;
 			try {
 				searchIndex = getSearchIndex(options.upstashUrl, options.upstashToken);
-			} catch (indexError) {
+			} catch (_indexError) {
 				return new Response(
 					JSON.stringify({ error: "Search service unavailable" }),
 					{
@@ -252,9 +288,9 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
 			}
 
 			// Search for documents
-			let documents: any[] = [];
+			let documents: SearchResult[] = [];
 			try {
-				const searchResults = await searchIndex.search({
+				const searchResults = await searchIndex?.search({
 					query: query.trim(),
 					limit: options?.searchLimit || SEARCH_LIMIT,
 					reranking: true,
@@ -262,7 +298,7 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
 				});
 
 				documents = searchResults || [];
-			} catch (searchError) {
+			} catch (_searchError) {
 				documents = [];
 			}
 
@@ -309,7 +345,7 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
 			const context = contextDocs
 				.map((doc) => {
 					const content = `[${doc.title}](${doc.thumbnail}) Content: ${doc.content}`;
-					return content.substring(0, MAX_CONTENT_LENGTH) + "...";
+					return `${content.substring(0, MAX_CONTENT_LENGTH)}...`;
 				})
 				.filter(Boolean)
 				.join("\n\n---\n\n");
@@ -339,9 +375,16 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
 
 			const userPrompt = `Question: ${query}\n\nRelevant content from the website:\n${context}\n\nPlease provide a comprehensive answer based on this information.`;
 			console.log("systemPrompt::", systemPrompt);
-			const messages = [
+			const messages: ChatMessage[] = [
 				{ role: "system", content: systemPrompt },
-				...(stream ? messagesHistory : []),
+				...(stream
+					? messagesHistory.filter(
+							(m): m is ChatMessage =>
+								m.role === "system" ||
+								m.role === "user" ||
+								m.role === "assistant",
+						)
+					: []),
 				{ role: "user", content: userPrompt },
 			];
 
@@ -351,7 +394,7 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
 				}
 
 				return await handleNonStreamingResponse(messages, sources, options);
-			} catch (aiError) {
+			} catch (_aiError) {
 				return new Response(
 					JSON.stringify({ error: "AI service unavailable" }),
 					{
@@ -360,7 +403,7 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
 					},
 				);
 			}
-		} catch (error) {
+		} catch (_error) {
 			return new Response(
 				JSON.stringify({ error: "Failed to process query" }),
 				{
@@ -375,7 +418,7 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
 });
 
 // Helper function to transform search result documents
-function transformDocument(result: any) {
+function transformDocument(result: SearchResult) {
 	const title =
 		result.metadata?.title || result.metadata?.pageTitle || "Untitled";
 	const description = result.metadata?.description || "";
@@ -400,20 +443,25 @@ ${rawContent}`;
 }
 
 // Helper function to create source objects
-function createSource(doc: any) {
+function createSource(doc: {
+	content?: string;
+	url: string;
+	title: string;
+	thumbnail: string;
+}) {
 	return {
 		url: doc.url,
 		title: doc.title,
 		thumbnail: doc.thumbnail,
-		snippet: (doc.content || "").substring(0, SNIPPET_LIMIT) + "...",
+		snippet: `${(doc.content || "").substring(0, SNIPPET_LIMIT)}...`,
 	};
 }
 
 // Helper function to handle streaming responses
 async function handleStreamingResponse(
-	messages: any[],
-	sources: any[],
-	options: any,
+	messages: ChatMessage[],
+	sources: Source[],
+	options: { maxOutputTokens?: number },
 ) {
 	const result = await streamText({
 		model: openai("gpt-5"),
@@ -467,9 +515,9 @@ async function handleStreamingResponse(
 
 // Helper function to handle non-streaming responses
 async function handleNonStreamingResponse(
-	messages: any[],
-	sources: any[],
-	options: any,
+	messages: ChatMessage[],
+	sources: Source[],
+	options: { maxOutputTokens?: number },
 ) {
 	const result = await streamText({
 		model: openai("gpt-5"),

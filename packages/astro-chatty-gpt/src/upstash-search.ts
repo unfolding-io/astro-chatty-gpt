@@ -24,7 +24,7 @@ function getSearchIndex(
 		searchIndex = searchClient.index("astro-chatty-gpt");
 	}
 
-	return searchIndex!;
+	return searchIndex;
 }
 
 // Export a function to get the search index
@@ -35,7 +35,7 @@ export interface AstroChattyContent {
 	url: string;
 	title: string;
 	language: string;
-	[key: string]: any;
+	[key: string]: unknown;
 }
 
 export interface AstroChattyIndex {

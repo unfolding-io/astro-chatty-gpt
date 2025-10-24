@@ -86,7 +86,7 @@ export async function scrapePages(
 export async function scrapePagesFromFiles(
 	htmlFiles: string[],
 	siteUrl: string,
-	logger: any,
+	logger: AstroIntegrationLogger,
 	namespace = "astro",
 	options: ScrapeOptions = {},
 ): Promise<ScrapedContent[]> {
@@ -346,7 +346,7 @@ function cleanContent(
 
 	// Limit content length
 	if (cleanedContent.length > options.maxContentLength) {
-		return cleanedContent.substring(0, options.maxContentLength) + "...";
+		return `${cleanedContent.substring(0, options.maxContentLength)}...`;
 	}
 
 	return cleanedContent;
