@@ -19,19 +19,17 @@ const links = [
 	},
 	{
 		name: "Getting Started",
-		href: "/getting-started",
+		href: "/docs/",
 	},
 
 	{
 		name: "Chat Widget",
-		href: "/using-our-chat-widget",
+		href: "/docs/widget/",
 	},
 ];
 
-const posts = await getCollection("pages");
-const sortedPosts = posts.sort(
-	(a, b) => (b.data.order || 0) - (a.data.order || 0),
-);
+const sortedPosts = await getCollection("docs");
+ 
 ---
 
 <!doctype html>
@@ -76,7 +74,7 @@ const sortedPosts = posts.sort(
 				</nav>
 				<div class="header-actions">
 					<a href="https://github.com/unfolding-io/astro-chatty-gpt" class="btn-secondary">Github</a>
-					<a href="/getting-started" class="btn-primary">Get Started</a>
+					<a href="/docs/" class="btn-primary">Docs</a>
 				</div>
 			</div>
 		</header>
@@ -109,8 +107,8 @@ const sortedPosts = posts.sort(
 					<div class="footer-links">
 						<h4>Documentation</h4>
 						<ul>
-							{sortedPosts.map((post: CollectionEntry<'pages'>) => (
-								<li><a href={post.slug}>{post.data.title}</a></li>
+							{links.map((post) => (
+								<li><a href={post.href}>{post.name}</a></li>
 							))}
 						</ul>
 					</div>
