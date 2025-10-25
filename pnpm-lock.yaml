@@ -88,6 +88,9 @@ importers:
       astro-integration-kit:
         specifier: 0.19.0
         version: 0.19.0(astro@5.14.6(@netlify/blobs@10.2.1)(@types/node@22.18.11)(@upstash/redis@1.35.6)(jiti@2.6.1)(lightningcss@1.30.1)(rollup@4.52.5)(typescript@5.9.3)(yaml@2.8.1))
+      starlight-theme-rapide:
+        specifier: ^0.5.2
+        version: 0.5.2(@astrojs/starlight@0.36.1(astro@5.14.6(@netlify/blobs@10.2.1)(@types/node@22.18.11)(@upstash/redis@1.35.6)(jiti@2.6.1)(lightningcss@1.30.1)(rollup@4.52.5)(typescript@5.9.3)(yaml@2.8.1)))
       tailwindcss:
         specifier: 4.1.14
         version: 4.1.14
@@ -393,8 +396,8 @@ packages:
   '@emmetio/css-abbreviation@2.1.8':
     resolution: {integrity: sha512-s9yjhJ6saOO/uk1V74eifykk2CBYi01STTK3WlXWGOepyKa23ymJ053+DNQjpFcy1ingpaO7AxCcwLvHFY9tuw==}
 
-  '@emmetio/css-parser@git+https://git@github.com:ramya-rao-a/css-parser.git#370c480ac103bd17c7bcfb34bf5d577dc40d3660':
-    resolution: {commit: 370c480ac103bd17c7bcfb34bf5d577dc40d3660, repo: git@github.com:ramya-rao-a/css-parser.git, type: git}
+  '@emmetio/css-parser@https://codeload.github.com/ramya-rao-a/css-parser/tar.gz/370c480ac103bd17c7bcfb34bf5d577dc40d3660':
+    resolution: {tarball: https://codeload.github.com/ramya-rao-a/css-parser/tar.gz/370c480ac103bd17c7bcfb34bf5d577dc40d3660}
     version: 0.4.0
 
   '@emmetio/html-matcher@1.3.0':
@@ -4167,6 +4170,12 @@ packages:
   stack-trace@0.0.10:
     resolution: {integrity: sha512-KGzahc7puUKkzyMt+IqAep+TVNbKP+k2Lmwhub39m1AsTSkaDutx56aDCo+HLDzf/D26BIHTJWNiTG1KAJiQCg==}
 
+  starlight-theme-rapide@0.5.2:
+    resolution: {integrity: sha512-4kNJutt0/3E0rjZvG9hvKeTTHGOHC97t2ZQDwDcokTM25yLgxavFu7BCm2Dm2UTw7fJpRXpu4gUWJ9xAOBmNww==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@astrojs/starlight': '>=0.34.0'
+
   std-env@3.10.0:
     resolution: {integrity: sha512-5GS12FdOZNliM5mAOxFRg7Ir0pWz8MdpYm6AY6VPkGpbA7ZzmbzNcBJQ0GPvvyWgcY7QAhCgf9Uy89I03faLkg==}
 
@@ -5435,7 +5444,7 @@ snapshots:
     dependencies:
       '@emmetio/scanner': 1.0.4
 
-  '@emmetio/css-parser@git+https://git@github.com:ramya-rao-a/css-parser.git#370c480ac103bd17c7bcfb34bf5d577dc40d3660':
+  '@emmetio/css-parser@https://codeload.github.com/ramya-rao-a/css-parser/tar.gz/370c480ac103bd17c7bcfb34bf5d577dc40d3660':
     dependencies:
       '@emmetio/stream-reader': 2.2.0
       '@emmetio/stream-reader-utils': 0.1.0
@@ -9935,6 +9944,10 @@ snapshots:
 
   stack-trace@0.0.10: {}
 
+  starlight-theme-rapide@0.5.2(@astrojs/starlight@0.36.1(astro@5.14.6(@netlify/blobs@10.2.1)(@types/node@22.18.11)(@upstash/redis@1.35.6)(jiti@2.6.1)(lightningcss@1.30.1)(rollup@4.52.5)(typescript@5.9.3)(yaml@2.8.1))):
+    dependencies:
+      '@astrojs/starlight': 0.36.1(astro@5.14.6(@netlify/blobs@10.2.1)(@types/node@22.18.11)(@upstash/redis@1.35.6)(jiti@2.6.1)(lightningcss@1.30.1)(rollup@4.52.5)(typescript@5.9.3)(yaml@2.8.1))
+
   std-env@3.10.0: {}
 
   stream-replace-string@2.0.0: {}
@@ -10365,7 +10378,7 @@ snapshots:
 
   volar-service-emmet@0.0.65(@volar/language-service@2.4.23):
     dependencies:
-      '@emmetio/css-parser': git+https://git@github.com:ramya-rao-a/css-parser.git#370c480ac103bd17c7bcfb34bf5d577dc40d3660
+      '@emmetio/css-parser': https://codeload.github.com/ramya-rao-a/css-parser/tar.gz/370c480ac103bd17c7bcfb34bf5d577dc40d3660
       '@emmetio/html-matcher': 1.3.0
       '@vscode/emmet-helper': 2.11.0
       vscode-uri: 3.1.0

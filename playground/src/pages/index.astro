@@ -1,12 +1,8 @@
 --- 
-import type { CollectionEntry } from "astro:content";
-import { getCollection } from "astro:content";
+
 import Layout from "../layouts/Layout.astro";
 
-const posts = await getCollection("pages");
-const sortedPosts = posts.sort(
-	(a, b) => (b.data.order || 0) - (a.data.order || 0),
-);
+
 ---
 
 <Layout title="Welcome to Astro." thumbnail="/home.png" description="Welcome to Astro. This is a playground for the Astro Chatty GPT package.">
@@ -30,7 +26,7 @@ const sortedPosts = posts.sort(
 				AstroChattyGpt is an AI integration, where intelligent search meets conversational AI for your Astro website.
 			</p>
 			<div class="hero-actions">
-				<a href="/getting-started" class="btn-primary-large">Get Started</a>
+				<a href="/docs/" class="btn-primary-large">Get Started</a>
 				<a href="https://github.com/unfolding-io/astro-chatty-gpt" class="btn-secondary-large">Github</a>
 			</div>
 		</div>
@@ -160,29 +156,7 @@ const sortedPosts = posts.sort(
 			</div>
 		</div>
 		
-		<div class="documentation-section">
-			<div class="docs-container">
-				<div class="section-header">
-					<h2>📚 Documentation</h2>
-					<p>Everything you need to get started with AstroChattyGpt</p>
-				</div>
-				
-				<div class="docs-grid">
-					{sortedPosts.map((post: CollectionEntry<'pages'>) => (
-						<a href={`/${post.slug}`} class="doc-card">
-							<div class="doc-icon">
-								{post.data.icon || '📖'}
-							</div>
-							<div class="doc-content">
-								<h3>{post.data.title}</h3>
-								<p>{post.data.description || `Learn about ${post.data.title.toLowerCase()}`}</p>
-								<div class="doc-arrow">→</div>
-							</div>
-						</a>
-					))}
-				</div>
-			</div>
-		</div>
+	 
 	</main>
 </Layout>
 

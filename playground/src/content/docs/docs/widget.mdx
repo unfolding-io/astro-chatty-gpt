@@ -1,0 +1,58 @@
+---
+title: Our Chat widged
+description: This guide explains how to integrate and customize the Astro Chatty GPT chat widget.
+ogImage: /widget.png
+---
+
+## Using the AstroChattyGPT Chat Widget
+
+This guide explains how to integrate and customize the **Astro Chatty GPT chat widget**.
+
+> **💡 Best Practice**: While this widget is great for testing, we recommend building your own custom chat widget using your preferred framework for production use. This gives you full control over styling, behavior, file size and integration with your existing design system.
+
+---
+
+## Widget script
+
+Place the <a href="/widget.iife.js" target="_blank">widget script</a> in your `/public` directory
+
+
+### Step 1: Add the Widget HTML
+
+Add the widget container and script to your HTML:
+
+```html
+<div id="chat-widget"></div>
+<script src="/widget.iife.js" defer></script>
+```
+
+### Step 2: Initialize the Widget
+
+Add the initialization script:
+
+```html
+<script>
+  // Initialize the chat widget when the page loads
+  document.addEventListener("DOMContentLoaded", function () {
+    // Wait a bit for the module to load
+    setTimeout(() => {
+      if (window.AstroChattyGptWidget) {
+        window.AstroChattyGptWidget.init(
+          { 
+            title: "ChatBotName",
+            language: "en", 
+            theme: {
+              primary: "#eb720f",
+              primaryHover: "#000000",
+            },
+          },
+          "chat-widget"
+        );
+      }
+    }, 1000);
+  });
+</script>
+```
+
+---
+ 

@@ -19,6 +19,7 @@ const pages = defineCollection({
 });
 
 export const collections = {
-	pages,
+
 	docs: defineCollection({ loader: docsLoader(), schema: docsSchema() }),
+	pages,
 };

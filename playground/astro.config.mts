@@ -6,6 +6,7 @@ import { hmrIntegration } from "astro-integration-kit/dev";
 import { loadEnv } from "vite";
 
 import starlight from '@astrojs/starlight';
+import starlightThemeRapide from 'starlight-theme-rapide'
 import packageName from "../packages/astro-chatty-gpt/dist/index.js";
 
 const env = loadEnv("", process.cwd(), "");
@@ -29,24 +30,38 @@ export default defineConfig({
 			//systemPrompt: "You are a helpful assistant that can answer questions about the website.",
 		}),
 		starlight({
+			plugins: [starlightThemeRapide()],
 			title: 'AstroChattyGpt Docs',
+			 
 			sidebar: [
 				// A single link item labelled “Home”.
-				{ label: 'Home', link: '/' },
+				/* { label: 'Home', link: '/' }, */
 				// A group labelled “Start Here” containing four links.
 				{
-				  label: 'Start Here',
+				  label: 'Get Startet',
 				  items: [ 
 					// Or using the shorthand for internal links.
-					'start-here',
-					'start-here/installation',
+					'docs/installation',
+					'docs/configuration',
+					'docs/api-endpoint',
+					'docs/development'
 				  ],
 				},
-				// A group linking to all pages in the reference directory.
 				{
+					label: 'Tips',
+					items: [ 
+					  // Or using the shorthand for internal links.
+					  'docs/prompts',
+					  'docs/widget',
+					  'docs/upstash',
+					  'docs/openai'
+					],
+				  },
+				// A group linking to all pages in the reference directory.
+				/* {
 				  label: 'Reference',
 				  autogenerate: { directory: 'reference' },
-				},
+				}, */
 			  ],
 		  }),
 		hmrIntegration({
