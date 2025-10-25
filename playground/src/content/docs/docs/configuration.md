@@ -72,14 +72,36 @@ maxOutputTokens: 1000  // Allows for longer responses
 
 Use this to prevent certain pages from being indexed for search. Useful for excluding admin pages, private content, or pages that shouldn't appear in search results.
 
-**Example:**
+**Pattern Types:**
+- **Exact matches**: `/404` excludes exactly `/404`
+- **Prefix matching**: `/admin` excludes `/admin/dashboard/`, `/admin/users/`, etc.
+- **Glob patterns**: `/admin/*` excludes `/admin/dashboard/`, `/admin/users/`, but not `/admin`
+- **Nested patterns**: `/private/**/*` excludes all content under `/private/` at any depth
+
+**Examples:**
 ```javascript
 excludeRoutes: [
-  "/admin/*",
-  "/private/*",
-  "/404"
+  "/admin/*",           // Exclude all admin pages
+  "/private/**/*",       // Exclude all private content (any depth)
+  "/404",               // Exclude 404 page
+  "/api/*",             // Exclude API documentation
+  "/test",              // Exclude /test/index.html and /test.html
+  "/draft/*"            // Exclude all draft content
 ]
 ```
+
+**What gets excluded:**
+- `/admin/dashboard/` ✅ (matches `/admin/*`)
+- `/private/docs/secret/` ✅ (matches `/private/**/*`)
+- `/404` ✅ (exact match)
+- `/api/endpoints/` ✅ (matches `/api/*`)
+- `/test` ✅ (exact match - excludes both `/test/index.html` and `/test.html`)
+- `/draft/article/` ✅ (matches `/draft/*`)
+
+**What gets included:**
+- `/docs/configuration/` ✅ (no match)
+- `/blog/post/` ✅ (no match)
+- `/about/` ✅ (no match)
 
 ### `maxContextDocs`
 
