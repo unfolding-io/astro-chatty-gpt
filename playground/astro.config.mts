@@ -14,28 +14,18 @@ const env = loadEnv("", process.cwd(), "");
 // https://astro.build/config
 export default defineConfig({
 	site: "http://astrochattygpt.unfolding.io",
+	output: "server",
 	adapter: netlify({
 		imageCDN: false,
 	}),
 	integrations: [
-		packageName({
-			upstashUrl: env.UPSTASH_SEARCH_REST_URL,
-			upstashToken: env.UPSTASH_SEARCH_REST_TOKEN,
-			openAiKey: env.OPENAI_API_KEY,
-			maxOutputTokens: 400,
-			maxContentLength: 1000,
-			contentTag: "main",
-			excludeRoutes: ["/about"],
-			excludeTags: [".sidebar", ".ads", ".navigation"],
-			//systemPrompt: "You are a helpful assistant that can answer questions about the website.",
-		}),
+		
 		starlight({
 			plugins: [starlightThemeRapide()],
 			title: 'AstroChattyGpt Docs',
-			 
+			disable404Route:true,
 			sidebar: [
-				// A single link item labelled “Home”.
-				/* { label: 'Home', link: '/' }, */
+				// A single link item labelled “Home”. 
 				// A group labelled “Start Here” containing four links.
 				{
 				  label: 'Get Startet',
@@ -58,16 +48,27 @@ export default defineConfig({
 					],
 				  },
 				// A group linking to all pages in the reference directory.
-				/* {
-				  label: 'Reference',
-				  autogenerate: { directory: 'reference' },
-				}, */
+				 
 			  ],
 		  }),
+
+		
 		hmrIntegration({
 			directory: createResolver(import.meta.url).resolve(
 				"../packages/astro-chatty-gpt/dist",
 			),
+		}),
+
+		packageName({
+			upstashUrl: env.UPSTASH_SEARCH_REST_URL,
+			upstashToken: env.UPSTASH_SEARCH_REST_TOKEN,
+			openAiKey: env.OPENAI_API_KEY,
+			maxOutputTokens: 400,
+			maxContentLength: 1000,
+			contentTag: "main",
+			excludeRoutes: ["/about"],
+			excludeTags: [".sidebar", ".ads", ".navigation"],
+			//systemPrompt: "You are a helpful assistant that can answer questions about the website.",
 		}),
 	],
 	vite: {
