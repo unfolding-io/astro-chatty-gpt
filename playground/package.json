@@ -25,6 +25,7 @@
 		"@astrojs/netlify": "^7.0.10",
 		"@netlify/blobs": "^10.7.8",
 		"@types/node": "^22.18.11",
-		"typescript": "^5.9.3"
+		"typescript": "^5.9.3",
+		"vite": "^7.3.3"
 	}
 }
