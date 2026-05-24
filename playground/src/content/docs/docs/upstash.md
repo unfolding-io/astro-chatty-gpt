@@ -28,7 +28,7 @@ It’s perfect for fast, cost-efficient full-text search in static or serverless
 
 ---
 
-###Step 2: Create a Search Database
+### Step 2: Create a Search Database
 
 1. Choose **Search** as the database type.
 2. Give your database a name (e.g., `my-search`).

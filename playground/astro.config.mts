@@ -28,7 +28,7 @@ export default defineConfig({
 				// A single link item labelled “Home”. 
 				// A group labelled “Start Here” containing four links.
 				{
-				  label: 'Get Startet',
+				  label: 'Get Started',
 				  items: [ 
 					// Or using the shorthand for internal links.
 					'docs/installation',

@@ -1,6 +1,6 @@
 ---
-title: OpenAi Key
-description: The GPT-5 API allows developers to access OpenAI's latest language model, which features improved reasoning capabilities and adjustable parameters for response generation.
+title: OpenAI Key
+description: Set up your OpenAI API key for astro-chatty-gpt chat responses with GPT-5.4 and reasoning options
 head:
   - tag: meta
     attrs:
@@ -57,7 +57,15 @@ OpenAI charges for API usage based on the number of tokens processed. Make sure 
 
 ---
 
-## AI Cost
+## How the integration calls OpenAI
+
+Chat requests use the [Vercel AI SDK](https://ai-sdk.dev) (`ai` v6 + `@ai-sdk/openai` v3) with `streamText`. You configure the model and reasoning options in `astro.config` — see [Configuration](/docs/configuration/) for `model`, `reasoningEffort`, and `textVerbosity`.
+
+Default model: **`gpt-5.4-mini`**.
+
+---
+
+## AI cost
 
 This integration uses the **OpenAI API** for generating responses. Cost depends on the `model` you choose in your Astro config (default: `gpt-5.4-mini`). The cost of using the AI chatbot is primarily determined by:
 

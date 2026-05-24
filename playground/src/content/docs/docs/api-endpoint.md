@@ -8,8 +8,53 @@ head:
       content: '/ai.png'
 ---
 
+The integration registers two API routes via Astro middleware. Both support CORS preflight (`OPTIONS`).
 
-## Endpoint
+## `/api/search`
+
+Semantic search over your indexed content. Requires Upstash credentials only (no OpenAI key).
+
+### GET
+
+```bash
+curl "https://yoursite.com/api/search?q=installation"
+```
+
+### POST
+
+```javascript
+const response = await fetch('/api/search', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ query: 'how to install' }),
+});
+const data = await response.json();
+```
+
+### Response
+
+```typescript
+interface SearchResponse {
+  ok: boolean;
+  query: string;
+  total: number;
+  results: Array<{
+    title: string;
+    description: string;
+    thumbnail: string;
+    url: string;
+    score: number;
+  }>;
+}
+```
+
+---
+
+## `/api/chatbot`
+
+RAG chat: retrieves relevant pages from Upstash, then generates an answer with OpenAI. Requires Upstash + OpenAI credentials.
+
+### Basic usage
 
 The integration automatically creates a `/api/chatbot` endpoint that accepts POST requests:
 
