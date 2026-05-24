@@ -1,7 +1,5 @@
 ---
 
-import type { CollectionEntry } from "astro:content";
-import { getCollection } from "astro:content";
 import "../styles/global.css";
 
 interface Props {
@@ -28,8 +26,6 @@ const links = [
 	},
 ];
 
-const sortedPosts = await getCollection("docs");
- 
 ---
 
 <!doctype html>

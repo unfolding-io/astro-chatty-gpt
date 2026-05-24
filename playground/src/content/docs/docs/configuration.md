@@ -12,6 +12,10 @@ head:
 
 This page covers all available configuration options for the Astro ChattyGPT integration. Each option is explained in detail with examples and use cases.
 
+:::note
+Requires **Astro 6** (`^6.0.0`) and **Node.js 22.12+**. Chat uses **Vercel AI SDK 6** with `@ai-sdk/openai` 3.x under the hood.
+:::
+
 ### `upstashUrl`
 
 **Type:** `string`  
@@ -49,6 +53,54 @@ This key is used to authenticate with OpenAI's API when generating responses. Ma
 **Example:**
 ```javascript
 openAiKey: "sk-..."
+```
+
+### `model`
+
+**Type:** `string` (enum)  
+**Default:** `"gpt-5.4-mini"`  
+**Description:** OpenAI model used for `/api/chatbot` responses.
+
+Choose a model that matches your quality, latency, and cost needs. Supported values:
+
+| Tier | Models |
+|------|--------|
+| GPT-5.4 (recommended) | `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` |
+| GPT-5 | `gpt-5`, `gpt-5-mini`, `gpt-5-nano` |
+| GPT-4.1 | `gpt-4.1`, `gpt-4.1-mini`, `gpt-4.1-nano` |
+| GPT-4o | `gpt-4o`, `gpt-4o-mini` |
+
+**Examples:**
+```javascript
+model: "gpt-5.4-mini"   // Balanced quality and cost (default)
+model: "gpt-5.4-nano"   // Fastest and cheapest for high volume
+model: "gpt-5.4"        // Highest quality in the 5.4 family
+model: "gpt-4o-mini"    // Widely available, no reasoning options
+```
+
+Verify your API key has access to the model at [platform.openai.com/account/limits](https://platform.openai.com/account/limits).
+
+### `reasoningEffort`
+
+**Type:** `"none" \| "minimal" \| "low" \| "medium" \| "high" \| "xhigh"`  
+**Default:** Auto (`none` for `gpt-5.4*`, `minimal` for other reasoning models)  
+**Description:** Controls how much internal reasoning the model uses. Only applies to reasoning-capable models (`gpt-5*` and o-series).
+
+**Example:**
+```javascript
+model: "gpt-5.4",
+reasoningEffort: "low",
+```
+
+### `textVerbosity`
+
+**Type:** `"low" \| "medium" \| "high"`  
+**Default:** `"low"`  
+**Description:** Controls response length for reasoning-capable models. Use `low` for concise RAG answers.
+
+**Example:**
+```javascript
+textVerbosity: "medium",
 ```
 
 ### `maxOutputTokens`

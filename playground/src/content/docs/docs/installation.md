@@ -1,6 +1,6 @@
 ---
 title: Install
-description: Step-by-step installation guide for Astro ChattyGPT integration with OpenAI and Upstash setup
+description: Install astro-chatty-gpt on Astro 6 with Upstash Search and OpenAI setup
 head:
   - tag: meta
     attrs:
@@ -8,14 +8,18 @@ head:
       content: '/ai.png'
 ---
 
-## Prerequisites
+## Requirements
 
-Before using this integration, you'll need:
+Before installing, ensure your project meets these requirements:
 
-1. **Upstash Account**: Sign up at [upstash.com](https://upstash.com) and create a Search Database
-2. **OpenAI API Key**: Get your API key from [platform.openai.com](https://platform.openai.com)
+- **Astro 6** — this integration declares `astro` `^6.0.0` as a peer dependency
+- **Node.js 22.12+** — required by Astro 6
+- **Server output** — set `output: 'server'` or `output: 'hybrid'` so middleware and API routes work
+- **Site URL** — set `site` in `astro.config` (used for indexing and canonical URLs)
+- **Upstash Search** — [create a database](https://upstash.com/docs/search/overall/getstarted) and copy REST credentials
+- **OpenAI API key** — from [platform.openai.com](https://platform.openai.com)
 
-## Required Environment Variables
+## Required environment variables
 
 Create a `.env` file in your project root:
 
@@ -25,9 +29,11 @@ UPSTASH_SEARCH_REST_TOKEN=your_upstash_rest_token
 OPENAI_API_KEY=your_openai_api_key
 ```
 
+See [Upstash keys](/docs/upstash/) and [OpenAI key](/docs/openai/) for step-by-step setup.
+
 ## Installation
 
-Install the integration **automatically** using the Astro CLI:
+Install with the Astro CLI:
 
 ```bash
 pnpm astro add astro-chatty-gpt
@@ -41,9 +47,7 @@ npx astro add astro-chatty-gpt
 yarn astro add astro-chatty-gpt
 ```
 
-Or install it **manually**:
-
-1. Install the required dependencies
+Or install manually:
 
 ```bash
 pnpm add astro-chatty-gpt
@@ -57,29 +61,63 @@ npm install astro-chatty-gpt
 yarn add astro-chatty-gpt
 ```
 
-2. Add the integration to your astro config
+## Add the integration
 
-```diff
-+import AstroChattyGpt from "astro-chatty-gpt";
-+import { loadEnv } from "vite";
-+const env = loadEnv("", process.cwd(), "");
+Add the integration to your Astro config. Load secrets from `.env` with Vite's `loadEnv`:
+
+```js
+import { defineConfig } from "astro/config";
+import netlify from "@astrojs/netlify"; // or your server adapter
+import AstroChattyGpt from "astro-chatty-gpt";
+import { loadEnv } from "vite";
+
+const env = loadEnv("", process.cwd(), "");
 
 export default defineConfig({
+  site: "https://yoursite.com",
+  output: "server",
+  adapter: netlify(), // optional: any SSR adapter
   integrations: [
-+    AstroChattyGpt({
-+      upstashUrl: env.UPSTASH_SEARCH_REST_URL!,
-+      upstashToken: env.UPSTASH_SEARCH_REST_TOKEN!,
-+      openAiKey: env.OPENAI_API_KEY!,
-+      maxOutputTokens: 500,
-+      excludeRoutes: ['admin/', 'private/'],
-+      maxContextDocs: 10,
-+      maxContentLength: 2000,
-+      contentTag: 'main',
-+      searchLimit: 10,
-+      excludeTags: ['.sidebar', '.ads', '.navigation'],
-+      botName: 'AstroChattyGpt',
-+      systemPrompt: 'You are a helpful assistant for my website.',
-+    }),
+    AstroChattyGpt({
+      upstashUrl: env.UPSTASH_SEARCH_REST_URL,
+      upstashToken: env.UPSTASH_SEARCH_REST_TOKEN,
+      openAiKey: env.OPENAI_API_KEY,
+      model: "gpt-5.4-mini",
+      reasoningEffort: "none",
+      textVerbosity: "low",
+      maxOutputTokens: 500,
+      excludeRoutes: ["admin/", "private/"],
+      maxContextDocs: 10,
+      maxContentLength: 2000,
+      contentTag: "main",
+      searchLimit: 10,
+      excludeTags: [".sidebar", ".ads", ".navigation"],
+      botName: "AstroChattyGpt",
+      systemPrompt: "You are a helpful assistant for my website.",
+    }),
   ],
 });
 ```
+
+## Build and index
+
+Run a production build to index your site into Upstash:
+
+```bash
+pnpm astro build
+```
+
+On `astro:build:done`, the integration reads generated HTML files, extracts main content, and upserts documents to your Upstash Search index. Missing credentials log a warning and skip indexing — the build still succeeds.
+
+## Verify
+
+1. **Search** — `GET /api/search?q=your+query` (after deploy or `astro dev`)
+2. **Chat** — `POST /api/chatbot` with `{ "query": "...", "stream": false }`
+
+Use [API endpoint](/docs/api-endpoint/) for full request examples.
+
+## Next steps
+
+- [Configuration](/docs/configuration/) — all integration options
+- [System prompt](/docs/prompts/) — customize bot personality
+- [Chat widget](/docs/widget/) — optional demo UI

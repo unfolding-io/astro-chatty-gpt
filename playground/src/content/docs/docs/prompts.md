@@ -26,7 +26,7 @@ This is where you make the assistant truly fit your brand or website.
 
 ## Example System Prompt
 
-Here the default system prompt template:
+Here is the default system prompt template:
 
 ```
 You are {bot_name}, a website assistant for {site_name}.  

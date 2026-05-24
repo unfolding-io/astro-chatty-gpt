@@ -1,6 +1,6 @@
 ---
 title: Development
-description: Development setup guide for contributing to Astro ChattyGPT with monorepo structure and troubleshooting tips
+description: Contribute to astro-chatty-gpt — monorepo setup, Astro 6 playground, and troubleshooting
 head:
   - tag: meta
     attrs:
@@ -8,48 +8,95 @@ head:
       content: '/db.png'
 ---
 
+## Monorepo structure
 
-## Info
+This repository is a pnpm workspace:
 
-This package is structured as a monorepo:
+| Path | Purpose |
+|------|---------|
+| `packages/astro-chatty-gpt` | The published integration (tsup → `dist/`) |
+| `playground` | Starlight docs site + integration demo |
+| Root | Shared scripts, Biome, Changesets |
 
-- `playground` contains code for testing the package
-- `packages/astro-chatty-gpt` contains the actual package
+## Requirements
 
-Install dependencies using pnpm: 
+- **Node.js 22.12+** (see `.nvmrc`)
+- **pnpm 10+** (`corepack enable` recommended)
+
+## Setup
 
 ```bash
-pnpm i --frozen-lockfile
+pnpm install
 ```
 
-Start the playground and package watcher:
+Build the integration package (required before the playground can load it):
 
 ```bash
-pnpm dev
+pnpm package:build
 ```
 
-You can now edit files in `packages/astro-chatty-gpt`. Please note that making changes to those files may require restarting the playground dev server.
+## Development commands
+
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Watch package + run playground dev server in parallel |
+| `pnpm package:dev` | Watch `packages/astro-chatty-gpt` with tsup |
+| `pnpm playground:dev` | Astro dev server (Starlight docs) |
+| `pnpm package:build` | One-off package build |
+| `pnpm playground:build` | `astro check` + production build + Upstash indexing |
+| `pnpm playground:check` | Type-check playground only |
+| `pnpm lint` | Biome check across the repo |
+
+The playground uses **Astro 6**, **Starlight 0.39+**, **Tailwind 4.3**, and **@astrojs/netlify 7** with HMR for the integration via `astro-integration-kit`.
+
+## Environment variables
+
+Copy credentials into `playground/.env`:
+
+```env
+UPSTASH_SEARCH_REST_URL=...
+UPSTASH_SEARCH_REST_TOKEN=...
+OPENAI_API_KEY=...
+```
+
+## Local API testing
+
+Use the dev server — `astro preview` is **not supported** with `@astrojs/netlify` v7:
+
+```bash
+pnpm playground:dev
+```
+
+Then test:
+
+- `GET http://localhost:4321/api/search?q=installation`
+- `POST http://localhost:4321/api/chatbot` with JSON body
 
 ## Troubleshooting
 
-### Common Issues
+### "Search service unavailable"
 
-1. **"Search service unavailable" error**
-   - Check your Upstash credentials are correct
-   - Ensure your Upstash Search Database is active
-   - Verify the REST URL and token are properly set
+- Check Upstash REST URL and token in `.env`
+- Confirm the Search database is active in the Upstash console
 
-2. **"AI service unavailable" error**
-   - Verify your OpenAI API key is valid
-   - Check you have sufficient OpenAI credits
-   - Ensure the API key has the correct permissions
+### "AI service unavailable"
 
-3. **No search results found**
-   - Make sure your website has been built and indexed
-   - Check the `include` and `exclude` patterns in your configuration
-   - Verify your content selectors are targeting the right elements
+- Verify `OPENAI_API_KEY` is set and valid
+- Confirm your account has credits and access to the configured `model`
+- Check [platform.openai.com/account/limits](https://platform.openai.com/account/limits)
 
-4. **Build-time indexing fails**
-   - Ensure your `site` option is set in `astro.config.mjs`
-   - Check that your website URLs are accessible
-   - Verify your content selectors match your HTML structure
+### No search results
+
+- Run `pnpm playground:build` (or `astro build`) so content is indexed
+- Review `excludeRoutes` and `excludeTags` in `astro.config`
+- Ensure `contentTag` matches your HTML (default: `main`)
+
+### Build-time indexing skipped
+
+- Set `site` in `astro.config`
+- Provide all three env vars (`UPSTASH_*` + `OPENAI_API_KEY` for chat; indexing only needs Upstash)
+- Check build logs for `[astro-chatty-gpt]` messages
+
+### Package changes not reflected
+
+Restart the playground dev server after editing `packages/astro-chatty-gpt` source, or rely on `pnpm dev` which watches both.

@@ -28,7 +28,7 @@ export default defineConfig({
 				// A single link item labelled “Home”. 
 				// A group labelled “Start Here” containing four links.
 				{
-				  label: 'Get Startet',
+				  label: 'Get Started',
 				  items: [ 
 					// Or using the shorthand for internal links.
 					'docs/installation',
@@ -63,6 +63,7 @@ export default defineConfig({
 			upstashUrl: env.UPSTASH_SEARCH_REST_URL,
 			upstashToken: env.UPSTASH_SEARCH_REST_TOKEN,
 			openAiKey: env.OPENAI_API_KEY,
+			model: "gpt-5.4-mini",
 			maxOutputTokens: 400,
 			maxContentLength: 1000,
 			contentTag: "main",

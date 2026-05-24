@@ -1,6 +1,6 @@
 ---
-title: OpenAi Key
-description: The GPT-5 API allows developers to access OpenAI's latest language model, which features improved reasoning capabilities and adjustable parameters for response generation.
+title: OpenAI Key
+description: Set up your OpenAI API key for astro-chatty-gpt chat responses with GPT-5.4 and reasoning options
 head:
   - tag: meta
     attrs:
@@ -57,9 +57,17 @@ OpenAI charges for API usage based on the number of tokens processed. Make sure 
 
 ---
 
-## AI Cost
+## How the integration calls OpenAI
 
-This integration uses the **GPT-5 API** for generating responses. The cost of using the AI chatbot is primarily determined by:
+Chat requests use the [Vercel AI SDK](https://ai-sdk.dev) (`ai` v6 + `@ai-sdk/openai` v3) with `streamText`. You configure the model and reasoning options in `astro.config` — see [Configuration](/docs/configuration/) for `model`, `reasoningEffort`, and `textVerbosity`.
+
+Default model: **`gpt-5.4-mini`**.
+
+---
+
+## AI cost
+
+This integration uses the **OpenAI API** for generating responses. Cost depends on the `model` you choose in your Astro config (default: `gpt-5.4-mini`). The cost of using the AI chatbot is primarily determined by:
 
 - **Number of documents** - Each document you include in the AI context increases token usage
 - **Max document length** - Longer documents consume more tokens per document
@@ -67,7 +75,7 @@ This integration uses the **GPT-5 API** for generating responses. The cost of us
 
 The more documents you retrieve for context, the longer each document is, and the longer your chat history, the more tokens will be consumed per API call.
 
-**Estimated Cost:** Based on testing, expect around **1 cent per message**, but your mileage may vary depending on how many documents you use and whether you include chat history in your API calls.
+**Estimated Cost:** Based on testing with `gpt-5.4-mini`, expect around **1 cent per message**, but your mileage will vary by model, document count, and chat history length. Cheaper models like `gpt-5.4-nano` or `gpt-4o-mini` typically cost less per message.
 
 For detailed pricing information, visit:
 - [OpenAI Pricing](https://openai.com/pricing)
