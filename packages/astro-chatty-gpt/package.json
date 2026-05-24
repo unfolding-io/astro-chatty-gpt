@@ -44,20 +44,17 @@
 		"astro": "^6.0.0"
 	},
 	"dependencies": {
-		"@ai-sdk/openai": "^2.0.53",
-		"@astrojs/check": "^0.9.9",
-		"@upstash/ratelimit": "^2.0.6",
-		"@upstash/redis": "^1.35.6",
-		"@upstash/search": "^0.1.5",
+		"@ai-sdk/openai": "^3.0.0",
+		"@upstash/redis": "^1.38.0",
+		"@upstash/search": "^0.1.7",
 		"@wcj/html-to-markdown": "^2.1.1",
-		"ai": "^5.0.76",
+		"ai": "^6.0.0",
 		"astro-integration-kit": "^0.20.0",
-		"html-to-markdown": "^1.0.0",
-		"jsdom": "^26.0.0",
+		"jsdom": "^26.1.0",
 		"typescript": "^5.9.3"
 	},
 	"devDependencies": {
-		"tsup": "^8.5.0",
+		"tsup": "^8.5.1",
 		"vite": "^7.1.11"
 	}
 }

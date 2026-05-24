@@ -2,8 +2,8 @@ import { defineMiddleware } from "astro:middleware";
 // @ts-expect-error - Virtual import from astro-chatty-gpt integration
 import { options } from "virtual:astro-chatty-gpt/internal";
 import { streamText } from "ai";
-import { buildStreamTextConfig } from "../dist/openai-chat.js";
 import type { ChatModelOptions } from "../dist/openai-chat.js";
+import { buildStreamTextConfig } from "../dist/openai-chat.js";
 import { getSearchIndex } from "../dist/upstash-search.js";
 
 // Type definitions
@@ -453,9 +453,7 @@ function createSource(doc: {
 	};
 }
 
-function getChatModelOptions(
-	opts: typeof options,
-): ChatModelOptions {
+function getChatModelOptions(opts: typeof options): ChatModelOptions {
 	return {
 		model: opts.model,
 		maxOutputTokens: opts.maxOutputTokens,
