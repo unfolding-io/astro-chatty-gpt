@@ -3,7 +3,7 @@
 	"private": true,
 	"packageManager": "pnpm@10.18.3",
 	"engines": {
-		"node": ">=22.12.0"
+		"node": ">=22.15.0"
 	},
 	"scripts": {
 		"package:dev": "pnpm --filter astro-chatty-gpt dev",

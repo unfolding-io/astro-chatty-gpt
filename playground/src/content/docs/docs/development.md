@@ -20,7 +20,7 @@ This repository is a pnpm workspace:
 
 ## Requirements
 
-- **Node.js 22.12+** (see `.nvmrc`)
+- **Node.js 22.15+** (see `.nvmrc`)
 - **pnpm 10+** (`corepack enable` recommended)
 
 ## Setup

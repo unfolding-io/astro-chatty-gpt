@@ -13,7 +13,7 @@ head:
 This page covers all available configuration options for the Astro ChattyGPT integration. Each option is explained in detail with examples and use cases.
 
 :::note
-Requires **Astro 6** (`^6.0.0`) and **Node.js 22.12+**. Chat uses **Vercel AI SDK 6** with `@ai-sdk/openai` 3.x under the hood.
+Requires **Astro 6** (`^6.0.0`) and **Node.js 22.15+**. Chat uses **Vercel AI SDK 6** with `@ai-sdk/openai` 3.x under the hood.
 :::
 
 ### `upstashUrl`

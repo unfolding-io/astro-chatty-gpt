@@ -13,7 +13,7 @@ head:
 Before installing, ensure your project meets these requirements:
 
 - **Astro 6** — this integration declares `astro` `^6.0.0` as a peer dependency
-- **Node.js 22.12+** — required by Astro 6
+- **Node.js 22.15+** — required by Astro 6 (see `.nvmrc`; avoids Corepack issues on Netlify)
 - **Server output** — set `output: 'server'` or `output: 'hybrid'` so middleware and API routes work
 - **Site URL** — set `site` in `astro.config` (used for indexing and canonical URLs)
 - **Upstash Search** — [create a database](https://upstash.com/docs/search/overall/getstarted) and copy REST credentials
