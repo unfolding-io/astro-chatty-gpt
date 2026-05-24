@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import type { AstroConfig, AstroIntegrationLogger } from "astro";
 import { z } from "astro/zod";
 import {
@@ -7,6 +8,12 @@ import {
 } from "astro-integration-kit";
 import type { ScrapedContent } from "./generate-search.js";
 import { scrapePagesFromFiles } from "./generate-search.js";
+import {
+	DEFAULT_MODEL,
+	OPENAI_CHAT_MODELS,
+	REASONING_EFFORTS,
+	TEXT_VERBOSITIES,
+} from "./openai-chat.js";
 import { getSearchIndex } from "./upstash-search.js";
 
 // Constants
@@ -70,6 +77,9 @@ const optionsSchema = z.object({
 	excludeTags: z.array(z.string()).optional(),
 	botName: z.string().optional(),
 	systemPrompt: z.string().optional(),
+	model: z.enum(OPENAI_CHAT_MODELS).default(DEFAULT_MODEL),
+	reasoningEffort: z.enum(REASONING_EFFORTS).optional(),
+	textVerbosity: z.enum(TEXT_VERBOSITIES).optional(),
 });
 
 // Export the inferred type
@@ -134,7 +144,7 @@ export default defineIntegration({
 						for (const [, urls] of assets) {
 							for (const url of urls) {
 								if (url?.pathname?.endsWith(".html")) {
-									htmlFiles.push(url.pathname);
+									htmlFiles.push(fileURLToPath(url));
 								}
 							}
 						}

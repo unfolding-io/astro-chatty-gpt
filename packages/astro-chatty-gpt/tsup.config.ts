@@ -6,7 +6,7 @@ export default defineConfig((options) => {
 	return {
 		entry: ["src/**/*.(ts|js)"],
 		format: ["esm"],
-		target: "node18",
+		target: "node22",
 		bundle: true,
 		dts: false,
 		sourcemap: true,

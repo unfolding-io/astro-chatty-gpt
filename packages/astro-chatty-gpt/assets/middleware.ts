@@ -1,8 +1,9 @@
 import { defineMiddleware } from "astro:middleware";
 // @ts-expect-error - Virtual import from astro-chatty-gpt integration
 import { options } from "virtual:astro-chatty-gpt/internal";
-import { openai } from "@ai-sdk/openai";
 import { streamText } from "ai";
+import { buildStreamTextConfig } from "../dist/openai-chat.js";
+import type { ChatModelOptions } from "../dist/openai-chat.js";
 import { getSearchIndex } from "../dist/upstash-search.js";
 
 // Type definitions
@@ -308,17 +309,13 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
 				const sources: never[] = [];
 
 				if (stream) {
-					const result = await streamText({
-						model: openai("gpt-5"),
-						maxOutputTokens: options?.maxOutputTokens || MAX_OUTPUT_TOKENS,
-						providerOptions: {
-							openai: {
-								reasoningEffort: "minimal",
-								textVerbosity: "low", // 'low' for concise, 'medium' (default), or 'high' for verbose
-							},
-						},
-						prompt: answer,
-					});
+					const result = await streamText(
+						buildStreamTextConfig({
+							prompt: answer,
+							options: getChatModelOptions(options),
+							defaultMaxOutputTokens: MAX_OUTPUT_TOKENS,
+						}),
+					);
 
 					return new Response(result.toTextStreamResponse().body, {
 						headers: { "Content-Type": "text/plain; charset=utf-8" },
@@ -374,7 +371,6 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
 				.replaceAll("{language}", language);
 
 			const userPrompt = `Question: ${query}\n\nRelevant content from the website:\n${context}\n\nPlease provide a comprehensive answer based on this information.`;
-			console.log("systemPrompt::", systemPrompt);
 			const messages: ChatMessage[] = [
 				{ role: "system", content: systemPrompt },
 				...(stream
@@ -457,23 +453,30 @@ function createSource(doc: {
 	};
 }
 
+function getChatModelOptions(
+	opts: typeof options,
+): ChatModelOptions {
+	return {
+		model: opts.model,
+		maxOutputTokens: opts.maxOutputTokens,
+		reasoningEffort: opts.reasoningEffort,
+		textVerbosity: opts.textVerbosity,
+	};
+}
+
 // Helper function to handle streaming responses
 async function handleStreamingResponse(
 	messages: ChatMessage[],
 	sources: Source[],
-	options: { maxOutputTokens?: number },
+	opts: typeof options,
 ) {
-	const result = await streamText({
-		model: openai("gpt-5"),
-		maxOutputTokens: options?.maxOutputTokens || MAX_OUTPUT_TOKENS,
-		providerOptions: {
-			openai: {
-				reasoningEffort: "minimal",
-				textVerbosity: "low", // 'low' for concise, 'medium' (default), or 'high' for verbose
-			},
-		},
-		messages,
-	});
+	const result = await streamText(
+		buildStreamTextConfig({
+			messages,
+			options: getChatModelOptions(opts),
+			defaultMaxOutputTokens: MAX_OUTPUT_TOKENS,
+		}),
+	);
 
 	const encoder = new TextEncoder();
 	const stream = new ReadableStream({
@@ -517,19 +520,15 @@ async function handleStreamingResponse(
 async function handleNonStreamingResponse(
 	messages: ChatMessage[],
 	sources: Source[],
-	options: { maxOutputTokens?: number },
+	opts: typeof options,
 ) {
-	const result = await streamText({
-		model: openai("gpt-5"),
-		maxOutputTokens: options?.maxOutputTokens || MAX_OUTPUT_TOKENS,
-		providerOptions: {
-			openai: {
-				reasoningEffort: "minimal",
-				textVerbosity: "low", // 'low' for concise, 'medium' (default), or 'high' for verbose
-			},
-		},
-		messages,
-	});
+	const result = await streamText(
+		buildStreamTextConfig({
+			messages,
+			options: getChatModelOptions(opts),
+			defaultMaxOutputTokens: MAX_OUTPUT_TOKENS,
+		}),
+	);
 
 	// Get the full text
 	let answer = "";

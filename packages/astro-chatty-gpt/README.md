@@ -66,6 +66,7 @@ export default defineConfig({
 +      upstashUrl: env.UPSTASH_SEARCH_REST_URL!,
 +      upstashToken: env.UPSTASH_SEARCH_REST_TOKEN!,
 +      openAiKey: env.OPENAI_API_KEY!,
++      model: 'gpt-5.4-mini',
 +      maxOutputTokens: 500,
 +      excludeRoutes: ['admin/', 'private/'],
 +      maxContextDocs: 10,
@@ -99,6 +100,9 @@ OPENAI_API_KEY=your_openai_api_key
 | `upstashUrl` | `string` | - | Upstash Search REST URL |
 | `upstashToken` | `string` | - | Upstash Search REST Token |
 | `openAiKey` | `string` | - | OpenAI API Key |
+| `model` | `string` | `"gpt-5.4-mini"` | OpenAI model for chat (`gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`, `gpt-5`, `gpt-4.1-mini`, `gpt-4o-mini`, etc.) |
+| `reasoningEffort` | `string` | auto | Reasoning effort for `gpt-5*` models (`none`, `minimal`, `low`, `medium`, `high`, `xhigh`) |
+| `textVerbosity` | `string` | `"low"` | Response verbosity for reasoning models (`low`, `medium`, `high`) |
 | `maxOutputTokens` | `number` | `500` | Maximum tokens to use for AI responses |
 | `excludeRoutes` | `string[]` | `[]` | Routes to exclude from indexing |
 | `maxContextDocs` | `number` | `10` | Maximum number of context documents |
